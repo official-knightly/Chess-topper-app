@@ -18,7 +18,8 @@
     "dist:win": "npm run build && electron-builder --win nsis --publish never",
     "dist:mac": "npm run build && electron-builder --mac dmg --publish never",
     "dist:linux": "npm run build && electron-builder --linux AppImage deb --publish never",
-    "build:firefox-ext": "node scripts/build-firefox-ext.mjs"
+    "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
+    "package:extensions": "node scripts/package-extensions.mjs"
   },
   "dependencies": {
     "@fontsource/instrument-sans": "5.2.8",
