@@ -15,9 +15,9 @@
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
     "start": "electron .",
     "package:dir": "npm run build && electron-builder --dir",
-    "dist:win": "npm run build && electron-builder --win nsis msi",
-    "dist:mac": "npm run build && electron-builder --mac dmg",
-    "dist:linux": "npm run build && electron-builder --linux AppImage deb",
+    "dist:win": "npm run build && electron-builder --win nsis msi --publish never",
+    "dist:mac": "npm run build && electron-builder --mac dmg --publish never",
+    "dist:linux": "npm run build && electron-builder --linux AppImage deb --publish never",
     "build:firefox-ext": "node scripts/build-firefox-ext.mjs"
   },
   "dependencies": {
