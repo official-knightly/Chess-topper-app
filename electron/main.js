@@ -14,6 +14,16 @@ const fairness = new FairnessLock();
 const secureStore = new SecureStore({ safeStorage, userDataPath: app.getPath("userData") });
 let lichessMonitor;
 
+function deliverProtocolUrl(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    if (url.protocol !== "chessist:" || url.hostname !== "oauth" || url.pathname !== "/lichess") return;
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("auth:callback", { provider: "lichess", code: url.searchParams.get("code"), state: url.searchParams.get("state"), error: url.searchParams.get("error") });
+  } catch {}
+}
+app.on("open-url", (event, url) => { event.preventDefault(); deliverProtocolUrl(url); });
+app.on("second-instance", (_event, argv) => { const url = argv.find(value => value.startsWith("chessist://")); if (url) deliverProtocolUrl(url); if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); } });
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1440,
