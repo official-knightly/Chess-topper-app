@@ -1,0 +1,40 @@
+{
+  "name": "chessist-local",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first cross-platform chess analysis and play application",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test": "node --test electron/*.test.js",
+    "start": "electron .",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "build:android": "npm run build && cap sync android",
+    "build:ios": "npm run build && cap sync ios"
+  },
+  "dependencies": {
+    "chess.js": "^1.4.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4"
+  },
+  "build": {
+    "appId": "ai.chessist.local",
+    "productName": "Chessist Local",
+    "directories": { "output": "release" },
+    "files": ["dist/**/*", "electron/**/*", "package.json"],
+    "extraResources": [{ "from": "engines", "to": "engines", "filter": ["**/*"] }],
+    "win": { "target": ["nsis", "msi"] },
+    "mac": { "target": ["dmg"] },
+    "linux": { "target": ["AppImage", "deb"] }
+  }
+}
