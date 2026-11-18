@@ -1,0 +1,2 @@
+import React from "react";
+export default function TitleBar(){return <div className="titlebar"><div className="titlebar-brand">♞ &nbsp; CHESSIST LOCAL</div><div className="titlebar-actions"><span/><span/><span/></div></div>}
