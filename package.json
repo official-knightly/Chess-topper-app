@@ -1,50 +1,96 @@
 {
   "name": "chessist-local",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Local-first chess desktop and companion application",
+  "description": "Chessist Local native desktop chess application",
   "main": "electron/main.js",
+  "author": "Official Knightly",
+  "license": "UNLICENSED",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build": "vite build",
-    "build:renderer": "node scripts/build-renderer.mjs",
-    "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
-    "build:ws-worker": "node scripts/build-ws-worker.mjs",
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
     "start": "electron .",
+    "package:dir": "npm run build && electron-builder --dir",
     "dist:win": "npm run build && electron-builder --win nsis msi",
     "dist:mac": "npm run build && electron-builder --mac dmg",
     "dist:linux": "npm run build && electron-builder --linux AppImage deb",
-    "build:android": "npm run build && node scripts/ensure-capacitor-platform.mjs android && cap sync android",
-    "build:ios": "npm run build && node scripts/ensure-capacitor-platform.mjs ios && cap sync ios"
+    "build:firefox-ext": "node scripts/build-firefox-ext.mjs"
   },
   "dependencies": {
-    "chess.js": "^1.4.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "zustand": "^5.0.8",
-    "@capacitor/core": "^7.4.3",
-    "@capacitor/android": "^7.4.3",
-    "@capacitor/ios": "^7.4.3",
-    "@fontsource/instrument-sans": "^5.2.8",
-    "ws": "^8.18.3"
+    "@fontsource/instrument-sans": "5.2.8",
+    "chess.js": "1.4.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "ws": "8.18.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3",
-    "@vitejs/plugin-react": "^4.7.0",
-    "electron": "^38.2.0",
-    "electron-builder": "^26.0.12",
-    "vite": "^6.3.5",
-    "vitest": "^3.2.4"
+    "concurrently": "9.2.1",
+    "cross-env": "10.1.0",
+    "electron": "38.2.0",
+    "electron-builder": "26.0.12",
+    "vite": "6.3.5",
+    "vitest": "3.2.4",
+    "wait-on": "8.0.4"
   },
   "build": {
     "appId": "ai.chessist.local",
     "productName": "Chessist Local",
-    "directories": { "output": "release" },
-    "files": ["dist/**/*", "electron/**/*", "package.json"],
-    "extraResources": [{ "from": "engines", "to": "engines", "filter": ["**/*"] }],
-    "win": { "target": ["nsis", "msi"] },
-    "mac": { "target": ["dmg"] },
-    "linux": { "target": ["AppImage", "deb"] }
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "node_modules/ws/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "engines",
+        "to": "engines",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "protocols": [
+      {
+        "name": "Chessist OAuth",
+        "schemes": [
+          "chessist"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "msi"
+      ],
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Game",
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }

@@ -8,7 +8,7 @@ function buildGame(moves, fen) {
     try { return new Chess(fen); } catch {}
   }
   const game = new Chess();
-  for (const uci of (moves || "").trim().split(/\\s+/).filter(Boolean)) {
+  for (const uci of (moves || "").trim().split(/\s+/).filter(Boolean)) {
     try { game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" }); }
     catch { break; }
   }
@@ -25,9 +25,9 @@ export default function SpectatePage({ fairness }) {
   const [pv, setPv] = useState("");
   const [depth, setDepth] = useState(18);
   const [info, setInfo] = useState(null);
-  const [engineType, setEngineType] = useState("stockfish");
+  const [engineType, setEngineType] = useState("berserk");
   const [engineStatus, setEngineStatus] = useState({ status: "idle", progress: 0 });
-  const [engineName, setEngineName] = useState("Default Stockfish");
+  const [engineName, setEngineName] = useState("Berserk WASM");
   const controller = useRef(null);
   const api = window.chessist;
   const canUseBerserk = Boolean(api?.engine?.authorize);
@@ -85,7 +85,7 @@ export default function SpectatePage({ fairness }) {
         const part = await reader.read();
         if (part.done) break;
         buffer += decoder.decode(part.value, { stream: true });
-        const lines = buffer.split(/\\r?\\n/);
+        const lines = buffer.split(/\r?\n/);
         buffer = lines.pop() || "";
         for (const line of lines) {
           if (!line.trim()) continue;

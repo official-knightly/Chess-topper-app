@@ -1,5 +1,5 @@
-# Stockfish binaries
+# Native UCI engines
 
-Place user-supplied native Stockfish executables in this directory, using the platform and architecture names supported by `electron/stockfish.js`.
+This folder is the optional location for locally installed UCI engine binaries and NNUE files. Native engines are not bundled by default. Use the Engine page to select a Stockfish or other UCI-compatible executable. Only distribute a binary when its license permits redistribution.
 
-Do not commit third-party engine binaries here unless you have verified their license and redistribution rights. The application can also use a custom binary path selected by the user.
+Berserk is available separately as a WebAssembly worker in `public/engine`.

@@ -1,3 +1,3 @@
 # Overlay status
 
-The transparent gameplay overlay from the reference project is intentionally not included. Chessist Local does not inject move suggestions or engine analysis into active online games. The app uses its own board for Lichess Board API games and opens Chess.com for play on that platform.
+No gameplay overlay is shipped. Chessist Local does not inject engine lines, move arrows or automated input into live Lichess or Chess.com games. Analysis is available for local positions, finished games and games the user spectates.

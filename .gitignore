@@ -1,0 +1,16 @@
+node_modules/
+dist/
+release/
+out/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+engines/stockfish-*
+engines/*.exe
+engines/*.nnue

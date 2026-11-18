@@ -1,1 +1,1 @@
-export { default } from "../components/SpectatePage";
+export { AnalysisWorkspace as default } from "../App";

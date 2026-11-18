@@ -37,3 +37,13 @@ test("rejects engine use from unapproved contexts even when no game is active", 
   assert.throws(() => lock.assertCanAnalyze("live-play"), error => error.code === "ENGINE_CONTEXT_DENIED");
   assert.throws(() => lock.assertCanAnalyze(), error => error.code === "ENGINE_CONTEXT_DENIED");
 });
+
+test("fails closed while a connected platform game status cannot be verified", () => {
+  const lock = new FairnessLock();
+  lock.setMonitoring("lichess", false);
+  assert.equal(lock.isLocked(), true);
+  assert.throws(() => lock.assertCanAnalyze("analysis-board"), error => error.code === "FAIRNESS_UNVERIFIED");
+  lock.setMonitoring("lichess", true);
+  assert.equal(lock.isLocked(), false);
+  assert.doesNotThrow(() => lock.assertCanAnalyze("analysis-board"));
+});

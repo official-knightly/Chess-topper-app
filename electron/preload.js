@@ -1,7 +1,14 @@
+"use strict";
 const { contextBridge, ipcRenderer } = require("electron");
-
+const listen = (channel, callback) => {
+  if (typeof callback !== "function") throw new TypeError("Listener must be a function");
+  const listener = (_event, value) => callback(value);
+  ipcRenderer.on(channel, listener);
+  return () => ipcRenderer.removeListener(channel, listener);
+};
 contextBridge.exposeInMainWorld("chessist", {
   os: process.platform,
+  isDesktop: true,
   window: {
     minimize: () => ipcRenderer.invoke("window:minimize"),
     toggleMaximize: () => ipcRenderer.invoke("window:toggle-maximize"),
@@ -14,35 +21,28 @@ contextBridge.exposeInMainWorld("chessist", {
     authorize: context => ipcRenderer.invoke("engine:authorize", context),
     stop: () => ipcRenderer.invoke("engine:stop"),
     setOption: (name, value) => ipcRenderer.invoke("engine:set-option", { name, value }),
-    onInfo: callback => {
-      const listener = (_event, info) => callback(info);
-      ipcRenderer.on("engine:info", listener);
-      return () => ipcRenderer.removeListener("engine:info", listener);
-    }
+    onInfo: callback => listen("engine:info", callback)
   },
-  fairness: {
-    getState: () => ipcRenderer.invoke("fairness:get-state"),
-    onChange: callback => {
-      const listener = (_event, state) => callback(state);
-      ipcRenderer.on("fairness:changed", listener);
-      return () => ipcRenderer.removeListener("fairness:changed", listener);
-    }
-  },
+  fairness: { getState: () => ipcRenderer.invoke("fairness:get-state"), onChange: callback => listen("fairness:changed", callback) },
+  extension: { onPage: callback => listen("extension:page", callback) },
   platform: {
-    chesscomGet: apiPath => ipcRenderer.invoke("chesscom:public-get", apiPath)
+    chesscomGet: apiPath => ipcRenderer.invoke("chesscom:public-get", apiPath),
+    openChessCom: () => ipcRenderer.invoke("platform:open-chesscom")
   },
   lichess: {
     request: options => ipcRenderer.invoke("lichess:request", options),
     streamGame: gameId => ipcRenderer.invoke("lichess:stream-game", gameId),
     stopGameStream: gameId => ipcRenderer.invoke("lichess:stop-game-stream", gameId),
-    onGameEvent: callback => { const listener = (_event, data) => callback(data); ipcRenderer.on("lichess:game-event", listener); return () => ipcRenderer.removeListener("lichess:game-event", listener); }
+    onGameEvent: callback => listen("lichess:game-event", callback)
   },
   auth: {
     openLichess: url => ipcRenderer.invoke("auth:open-lichess", url),
+    exchangeLichessToken: input => ipcRenderer.invoke("auth:exchange-lichess-token", input),
     storeLichessToken: token => ipcRenderer.invoke("auth:store-lichess-token", token),
     clearLichess: () => ipcRenderer.invoke("auth:clear-lichess"),
-    onCallback: callback => { const listener = (_event, data) => callback(data); ipcRenderer.on("auth:callback", listener); return () => ipcRenderer.removeListener("auth:callback", listener); },
-    onError: callback => { const listener = (_event, error) => callback(error); ipcRenderer.on("platform:error", listener); return () => ipcRenderer.removeListener("platform:error", listener); }
+    getStatus: () => ipcRenderer.invoke("auth:get-status"),
+    onCallback: callback => listen("auth:callback", callback),
+    onError: callback => listen("platform:error", callback)
   },
   diagnostics: () => ipcRenderer.invoke("diagnostics:get")
 });

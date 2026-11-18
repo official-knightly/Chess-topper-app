@@ -1,7 +1,8 @@
-name: Chessist Local Release Builds
+name: Chessist Local Desktop Releases
 on:
   workflow_dispatch:
   push:
+    branches: [chessist-desktop-app]
     tags: ["v*"]
 jobs:
   desktop:
@@ -21,55 +22,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - run: npm install
       - run: npm test
-      - run: npm run build
       - run: npm run dist:${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         with:
-          name: chessist-${{ matrix.target }}
+          name: chessist-local-${{ matrix.target }}
           path: release/*
           if-no-files-found: error
-  android:
+  browser-companion:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-      - run: npm install
-      - run: npm test
-      - run: npm run build
-      - run: npx cap add android
-      - run: npx cap sync android
-      - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - run: npm run build:firefox-ext
       - uses: actions/upload-artifact@v4
         with:
-          name: chessist-android-apk
-          path: android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-  ios:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm install
-      - run: npm run build
-      - run: npx cap add ios
-      - run: npx cap sync ios
-      - run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath build/ios build
-      - run: ditto -c -k --sequesterRsrc --keepParent build/ios/Build/Products/Debug-iphonesimulator/App.app chessist-ios-simulator.zip
-      - uses: actions/upload-artifact@v4
-        with:
-          name: chessist-ios-simulator
-          path: chessist-ios-simulator.zip
+          name: chessist-browser-companion
+          path: release/firefox-extension/**
           if-no-files-found: error
