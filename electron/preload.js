@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld("chessist", {
   },
   engine: {
     start: () => ipcRenderer.invoke("engine:start"),
+    choose: () => ipcRenderer.invoke("engine:choose"),
     analyze: options => ipcRenderer.invoke("engine:analyze", options),
     stop: () => ipcRenderer.invoke("engine:stop"),
     setOption: (name, value) => ipcRenderer.invoke("engine:set-option", { name, value }),
