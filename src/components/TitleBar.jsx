@@ -1,2 +1,2 @@
 import React from "react";
-export default function TitleBar(){return <div className="titlebar"><div className="titlebar-brand">♞ &nbsp; CHESSIST LOCAL</div><div className="titlebar-actions"><span/><span/><span/></div></div>}
+export default function TitleBar(){const controls=window.chessist?.window;return <div className="titlebar"><div className="titlebar-brand">♞ &nbsp; CHESSIST LOCAL</div><div className="titlebar-actions"><button aria-label="Minimize" onClick={()=>controls?.minimize()}>−</button><button aria-label="Maximize" onClick={()=>controls?.toggleMaximize()}>□</button><button aria-label="Close" onClick={()=>controls?.close()}>×</button></div></div>}
