@@ -58,7 +58,7 @@ ipcMain.handle("engine:start", async () => {
   return { ready: true, path: enginePath };
 });
 ipcMain.handle("engine:analyze", async (_event, options) => {
-  fairness.assertCanAnalyze();
+  fairness.assertCanAnalyze(options?.context);
   if (!engine) throw new Error("Start Stockfish before analysis");
   await engine.analyze(options);
   return { accepted: true };
