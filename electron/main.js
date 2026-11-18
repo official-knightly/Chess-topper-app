@@ -61,6 +61,9 @@ function updateVerifiedPlatformGameState(state) {
   return snapshot;
 }
 
+ipcMain.handle("window:minimize", () => mainWindow?.minimize());
+ipcMain.handle("window:toggle-maximize", () => { if (mainWindow?.isMaximized()) mainWindow.unmaximize(); else mainWindow?.maximize(); });
+ipcMain.handle("window:close", () => mainWindow?.close());
 ipcMain.handle("fairness:get-state", () => fairness.snapshot());
 ipcMain.handle("auth:open-lichess", async (_event, url) => {
   const parsed = new URL(url);
