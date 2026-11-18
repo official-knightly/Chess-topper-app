@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, safeStorage, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, safeStorage, shell, dialog } = require("electron");
 const path = require("node:path");
 const { UciEngine } = require("./engine");
 const { FairnessLock } = require("./fairness-lock");
@@ -88,6 +88,19 @@ ipcMain.handle("auth:store-lichess-token", async (_event, token) => {
 });
 ipcMain.handle("auth:clear-lichess", () => { lichessApi?.stopAll(); lichessApi = null; lichessMonitor?.stop(); lichessMonitor = null; secureStore.delete("lichess"); fairness.clearPlatform("lichess"); broadcastFairness(); return { disconnected: true }; });
 
+ipcMain.handle("engine:choose", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, { title: "Select a UCI chess engine", properties: ["openFile"] });
+  if (result.canceled || !result.filePaths[0]) return { canceled: true };
+  const selected = result.filePaths[0];
+  const fs = require("node:fs");
+  if (!fs.statSync(selected).isFile()) throw new Error("Selected engine path is not a file.");
+  engine?.quit();
+  enginePath = selected;
+  engine = new UciEngine({ binaryPath: enginePath, fairnessLock: fairness });
+  engine.on("info", info => mainWindow?.webContents.send("engine:info", info));
+  await engine.start();
+  return { ready: true, path: enginePath };
+});
 ipcMain.handle("engine:start", async () => {
   if (engine) return { ready: true, path: enginePath };
   enginePath = resolveStockfishPath({ appPath: app.isPackaged ? process.resourcesPath : process.cwd() });
