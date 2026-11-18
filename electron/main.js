@@ -6,6 +6,7 @@ const { resolveStockfishPath } = require("./stockfish");
 const { getDiagnostics } = require("./diagnostics");
 const { SecureStore } = require("./secure-store");
 const { LichessMonitor } = require("./lichess-monitor");
+const { LichessApi } = require("./lichess-api");
 
 let mainWindow;
 let engine;
@@ -13,6 +14,7 @@ let enginePath = null;
 const fairness = new FairnessLock();
 const secureStore = new SecureStore({ safeStorage, userDataPath: app.getPath("userData") });
 let lichessMonitor;
+let lichessApi;
 
 function deliverProtocolUrl(rawUrl) {
   try {
@@ -71,15 +73,20 @@ ipcMain.handle("auth:open-lichess", async (_event, url) => {
   await shell.openExternal(parsed.toString());
   return { opened: true };
 });
+ipcMain.handle("lichess:request", (_event, options) => { if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.request(options.path, options); });
+ipcMain.handle("lichess:stream-game", (_event, gameId) => { if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.streamGame(gameId); });
+ipcMain.handle("lichess:stop-game-stream", (_event, gameId) => lichessApi?.stopStream(gameId));
 ipcMain.handle("auth:store-lichess-token", async (_event, token) => {
   if (typeof token !== "string" || token.length < 20 || token.length > 4096) throw new Error("Invalid Lichess access token.");
   secureStore.save("lichess", token);
+  lichessApi?.stopAll();
+  lichessApi = new LichessApi({ tokenProvider: async () => secureStore.get("lichess"), onGameEvent: (gameId, event) => mainWindow?.webContents.send("lichess:game-event", { gameId, event }) });
   lichessMonitor?.stop();
   lichessMonitor = new LichessMonitor({ tokenProvider: async () => secureStore.get("lichess"), onGameState: updateVerifiedPlatformGameState });
   lichessMonitor.start().catch(error => mainWindow?.webContents.send("platform:error", { platform: "lichess", message: error.message }));
   return { connected: true };
 });
-ipcMain.handle("auth:clear-lichess", () => { lichessMonitor?.stop(); lichessMonitor = null; secureStore.delete("lichess"); fairness.clearPlatform("lichess"); broadcastFairness(); return { disconnected: true }; });
+ipcMain.handle("auth:clear-lichess", () => { lichessApi?.stopAll(); lichessApi = null; lichessMonitor?.stop(); lichessMonitor = null; secureStore.delete("lichess"); fairness.clearPlatform("lichess"); broadcastFairness(); return { disconnected: true }; });
 
 ipcMain.handle("engine:start", async () => {
   if (engine) return { ready: true, path: enginePath };
@@ -110,6 +117,7 @@ app.whenReady().then(() => {
   createWindow();
   const savedToken = secureStore.get("lichess");
   if (savedToken) {
+    lichessApi = new LichessApi({ tokenProvider: async () => secureStore.get("lichess"), onGameEvent: (gameId, event) => mainWindow?.webContents.send("lichess:game-event", { gameId, event }) });
     lichessMonitor = new LichessMonitor({ tokenProvider: async () => secureStore.get("lichess"), onGameState: updateVerifiedPlatformGameState });
     lichessMonitor.start().catch(error => mainWindow?.webContents.send("platform:error", { platform: "lichess", message: error.message }));
   }
