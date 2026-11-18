@@ -16,3 +16,17 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run build:firefox-ext
+
+  ui-template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - name: Install UI template dependencies
+        working-directory: ui-template
+        run: bun install --frozen-lockfile --production
+      - name: Build UI template preview
+        working-directory: ui-template
+        run: bun run build
