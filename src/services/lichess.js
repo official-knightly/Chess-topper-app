@@ -10,7 +10,7 @@ export class LichessService{
  async json(path,opts){return (await this.request(path,opts)).json();}
  getProfile(username){return this.json("/api/user/"+encodeURIComponent(username));}
  getRatings(username){return this.getProfile(username).then(p=>p.perfs||{});}
- async getRecentGames(username,{max=20}={}){const text=await (await this.request("/api/games/user/"+encodeURIComponent(username)+"?max="+max+"&moves=true",{headers:{Accept:"application/x-ndjson"}})).text();return text.split("\\n").filter(Boolean).map(line=>JSON.parse(line));}
+ async getRecentGames(username,{max=20}={}){const text=await (await this.request("/api/games/user/"+encodeURIComponent(username)+"?max="+max+"&moves=true",{headers:{Accept:"application/x-ndjson"}})).text();return text.split(/\\r?\\n/).filter(Boolean).map(line=>JSON.parse(line));}
  async getGamePGN(gameId){return (await this.request("/game/export/"+encodeURIComponent(gameId),{headers:{Accept:"application/x-chess-pgn"}})).text();}
  getCurrentGame(username){return this.json("/api/user/"+encodeURIComponent(username)+"/current-game");}
  getTvChannels(){return this.json("/api/tv/channels");}
