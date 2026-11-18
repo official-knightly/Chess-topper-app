@@ -1,0 +1,1 @@
+import React from "react";export default function SettingsModal({open,onClose,children}){if(!open)return null;return <div className="modal-backdrop" role="presentation" onClick={onClose}><section className="panel-card" role="dialog" aria-modal="true" onClick={e=>e.stopPropagation()}>{children}<button className="quiet-button" onClick={onClose}>Close</button></section></div>;}

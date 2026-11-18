@@ -1,32 +1,21 @@
-# Chessist Local Pro
+# Chessist Local
 
-A local-first chess desktop and mobile workspace built with React, Vite, Electron and Capacitor. The goal is a better integrated analysis, play and spectating experience without scraping other websites, reading browser pages, or injecting overlays.
+Chessist Local is a local-first chess desktop workspace built with React, Vite and Electron. It uses the official Lichess Board API for in-app games, the Chess.com Published-Data API for public player information, and a local UCI engine / Berserk WASM worker for analysis when fair-play rules allow it.
 
-## Current implementation
+## What works
+- Lichess OAuth 2.0 with PKCE and OS-encrypted token storage.
+- Lichess seek, friend challenge, AI challenge, live board stream, clocks, chat, resign, abort and draw actions from the desktop app.
+- Correct player-colour board orientation and input lock while waiting for the opponent.
+- Public Lichess spectating and TV channels.
+- Public Lichess and Chess.com profile, rating and recent-game lookup.
+- Chess.com **Play** action opens the official Chess.com online-play page in the browser. Chess.com's published API is read-only; it does not expose an API for controlling a human game.
+- Native UCI engine integration and Berserk WASM analysis.
+- Main-process fairness lock rejects engine searches while the connected Lichess account is participating in an active online game.
+- Optional browser companion reports only the current Lichess/Chess.com tab URL to the local app. It does not inspect boards, extract moves, inject engine arrows or automate clicks/keys.
+- Desktop installer workflows for Windows, macOS and Linux, plus existing Capacitor build targets.
 
-- Electron shell with context isolation, a restricted preload bridge and working custom window controls.
-- Responsive dark-purple React workspace with collapsible desktop sidebar, mobile bottom navigation and a chessboard.
-- Local analysis board with FEN/PGN import, UCI engine output and best-move arrows.
-- User-selected UCI engine executable from the desktop app.
-- Lichess OAuth 2.0 PKCE helper, encrypted desktop token storage, authenticated Board API proxy, game stream and in-app seek/challenge/AI play controls.
-- Main-process Lichess event monitor that locks engine analysis while the signed-in user is playing and unlocks after the game finishes.
-- Public Lichess spectating by username and TV channel, with best-move arrows and live switching between native UCI engines and your Berserk WASM engine.
-- Berserk WASM worker and generated loader are sourced from the matching `official-knightly/Berserk-web` build; the engine search path requests main-process fairness authorization before every search.
-- Public Lichess and Chess.com profile adapters; World Chess intentionally remains an explicit unsupported stub rather than scraping.
-- Mocked API tests plus UCI, binary resolver, updater and fairness-lock tests.
-- Capacitor configuration and CI workflows for desktop installers, Android debug APK and iOS Simulator build.
-
-Some navigation areas are still staged placeholders. Finished-game review, local bot, persistent library, puzzles, opening explorer, performance suite, mobile Stockfish WASM and mobile secure token storage remain planned work. The Lichess OAuth flow and platform APIs should be tested with a registered application and a real account before public release.
-
-## Requirements
-
-- Node.js 20+ (22 recommended)
-- npm
-- A Stockfish native binary matching the desktop OS and CPU architecture for desktop engine use
-- Android Studio + Android SDK for local Android builds
-- Xcode on macOS for iOS builds
-
-## Run locally
+## Run
+Requires Node.js 20+ (22 recommended).
 
 ```sh
 npm install
@@ -35,63 +24,35 @@ npm run build
 npm start
 ```
 
-For renderer development, run the Vite server in one terminal and launch Electron with `VITE_DEV_SERVER_URL` set to the server URL.
-
-## Add or switch Stockfish
-
-Place a user-supplied native Stockfish executable in `engines/` using the platform filenames supported by `electron/stockfish.js`, or use the **Switch engine…** action in Spectate to choose an executable from disk. Do not commit engine binaries unless redistribution rights and the engine license have been checked. NNUE files must be supplied where required by the engine build.
-
 ## Lichess setup
+1. Create a personal OAuth application in Lichess account settings.
+2. Register the redirect URI `chessist://oauth/lichess`.
+3. Enter the OAuth client ID in Chessist Settings.
+4. Connect and approve the requested scopes.
+5. Use the Play page to seek, challenge a player or challenge the Lichess AI.
 
-1. Sign in to Lichess and create a personal OAuth application in your Lichess account settings.
-2. Register this redirect URI exactly: `chessist://oauth/lichess`.
-3. Copy the OAuth application client ID into Chessist Local → Settings → Lichess account.
-4. Select **Connect Lichess** and approve the requested `board:play`, `challenge:write`, and `preference:read` scopes.
-5. Once connected, Play uses the Lichess Board API inside the app. You do not need to open the Lichess website to seek or play a game.
+The access token is stored using Electron's OS-backed `safeStorage`. Do not share or commit it.
 
-The desktop app stores the access token encrypted with Electron's OS-backed `safeStorage`. Do not share the token or commit it to source control.
+## Chess.com
+Chessist uses the official Published-Data API for public profiles, ratings and archived games. To play a game, use **Play on Chess.com**; this opens Chess.com's own online-play page. There is no supported Chess.com public API for submitting moves to a human game.
 
-## Build desktop installers
+## Browser companion
+Load the `extension/` directory as an unpacked Chromium extension. It connects to the desktop bridge at `127.0.0.1:27301`. The bridge accepts only supported-site page-presence messages from a local browser extension. It does not transmit account tokens or board/game data.
 
+## Engine and fair play
+Native UCI engines are started and controlled by Electron. Berserk WASM is loaded in a dedicated worker. Analysis is permitted on free positions, spectator games and finished games. When the signed-in Lichess account is in an active online game, the main process denies engine analysis regardless of renderer state.
+
+Do not use analysis assistance during rated or casual online games. Chessist does not provide live move recommendations or automated moves for games in which the user is a participant.
+
+## Build
 ```sh
 npm run dist:win
 npm run dist:mac
 npm run dist:linux
+npm run build:firefox-ext
 ```
 
-Outputs are written to `release/`. Windows builds target NSIS and MSI, macOS targets DMG, and Linux targets AppImage and DEB. Builds produced without signing certificates are unsigned and may show OS security warnings.
+Desktop artifacts are written to `release/`. Native engine binaries are not bundled by default; provide a compatible UCI engine and required NNUE files, or select one in the app. Only redistribute engines when their licenses permit it.
 
-## Build mobile
-
-```sh
-npm run build:android
-npm run build:ios
-```
-
-The first run creates the Capacitor native project. For an Android debug APK:
-
-```sh
-cd android
-./gradlew assembleDebug
-```
-
-The APK is written to `android/app/build/outputs/apk/debug/`. iOS builds require macOS and Xcode; the current CI workflow produces an iOS Simulator app archive, not a signed App Store IPA. A signed iOS release requires an Apple Developer account and signing assets.
-
-## GitHub Actions artifacts
-
-Run **Actions → Chessist Local Release Builds → Run workflow** to build Windows, macOS, Linux, Android and iOS Simulator artifacts. Tag pushes matching `v*` also trigger the release build workflow. Download each platform's artifact from the workflow run page.
-
-## Fair-play policy
-
-The native engine is permitted for finished-game review, free analysis positions, local bot games under the configured policy, and games being spectated where the user is not a participant. During an active Lichess game in which the connected account is a participant, the Electron main process rejects analysis requests. The Lichess event stream and account-playing endpoint feed that lock; the renderer cannot set or clear it.
-
-There are no live-play move suggestions, automatic moves, browser-page reading, screen reading, overlays, browser extensions, or keyboard/mouse automation. Chess.com integration is read-only and uses its Published-Data API. World Chess is a no-scraping stub until an official public API is available.
-
-## Test suite
-
-```sh
-npm test
-npm run build
-```
-
-The tests cover UCI parsing, Stockfish path resolution, updater URL validation, fairness-lock behavior, adapter contracts, Lichess NDJSON parsing and rate-limit handling, Chess.com caching, and the World Chess unsupported response.
+## Reference architecture
+The directory layout follows the requested Chessist reference organization where it fits this app. The upstream repository did not include a license file, so this project uses independently written integration code rather than copying its implementation. Some upstream-only components (Bun worker, transparent gameplay overlay and binary artwork) are intentionally not imported.

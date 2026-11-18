@@ -1,0 +1,1 @@
+import React from "react";export default function Check({label,checked,onChange}){return <label className="check-label"><input type="checkbox" checked={Boolean(checked)} onChange={e=>onChange?.(e.target.checked)}/>{label}</label>;}

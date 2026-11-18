@@ -1,0 +1,1 @@
+export const settingControls=[{id:"board-coordinates",label:"Board coordinates",type:"boolean",defaultValue:true},{id:"move-sounds",label:"Move sounds",type:"boolean",defaultValue:false},{id:"analysis-depth",label:"Analysis depth",type:"number",min:8,max:30,defaultValue:18}];

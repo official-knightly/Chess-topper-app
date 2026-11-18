@@ -1,0 +1,1 @@
+import React from "react";export default function EvalPanel({score,depth,nps}){return <section className="eval-card"><div className="eyebrow">ENGINE EVALUATION</div><div className="eval-score">{score??"—"}</div><div className="engine-stats"><span>DEPTH <b>{depth??"—"}</b></span><span>NPS <b>{nps??"—"}</b></span></div></section>;}

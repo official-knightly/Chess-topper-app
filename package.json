@@ -1,13 +1,16 @@
 {
   "name": "chessist-local",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Local-first cross-platform chess analysis and play application",
+  "description": "Local-first chess desktop and companion application",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
+    "build:renderer": "node scripts/build-renderer.mjs",
+    "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
+    "build:ws-worker": "node scripts/build-ws-worker.mjs",
+    "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
     "start": "electron .",
     "dist:win": "npm run build && electron-builder --win nsis msi",
     "dist:mac": "npm run build && electron-builder --mac dmg",
@@ -23,7 +26,8 @@
     "@capacitor/core": "^7.4.3",
     "@capacitor/android": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
-    "@fontsource/instrument-sans": "^5.2.8"
+    "@fontsource/instrument-sans": "^5.2.8",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
@@ -36,39 +40,11 @@
   "build": {
     "appId": "ai.chessist.local",
     "productName": "Chessist Local",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "engines",
-        "to": "engines",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "win": {
-      "target": [
-        "nsis",
-        "msi"
-      ]
-    },
-    "mac": {
-      "target": [
-        "dmg"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    }
+    "directories": { "output": "release" },
+    "files": ["dist/**/*", "electron/**/*", "package.json"],
+    "extraResources": [{ "from": "engines", "to": "engines", "filter": ["**/*"] }],
+    "win": { "target": ["nsis", "msi"] },
+    "mac": { "target": ["dmg"] },
+    "linux": { "target": ["AppImage", "deb"] }
   }
 }

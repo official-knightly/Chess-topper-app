@@ -1,0 +1,1 @@
+import React from "react";export default function PerformanceResults({results=[]}){return <section className="panel-card"><div className="panel-title">Performance results</div>{results.length?results.map((r,i)=><p key={i}>{r.name||"Run"} · {r.nps||0} nodes/s</p>):<p className="helper-text">Run a benchmark to see measured engine performance.</p>}</section>;}

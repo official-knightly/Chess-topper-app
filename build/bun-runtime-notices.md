@@ -1,0 +1,1 @@
+Chessist Local does not bundle or require the Bun runtime. The local bridge uses the Node.js WebSocket package and the desktop application uses Electron's main process. This notice file is retained to document the architectural difference from the upstream reference.

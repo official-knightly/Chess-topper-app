@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Chessist Companion",
+  "version": "1.0.0",
+  "description": "Reports supported chess-site tab presence to the local Chessist desktop app.",
+  "permissions": ["tabs"],
+  "host_permissions": [
+    "https://lichess.org/*",
+    "https://www.lichess.org/*",
+    "https://chess.com/*",
+    "https://www.chess.com/*",
+    "http://127.0.0.1:27301/*"
+  ],
+  "background": { "scripts": ["src/background/service-worker.js"] },
+  "content_scripts": [{
+    "matches": [
+      "https://lichess.org/*",
+      "https://www.lichess.org/*",
+      "https://chess.com/*",
+      "https://www.chess.com/*"
+    ],
+    "js": ["src/content/content.js"],
+    "run_at": "document_idle"
+  }],
+  "action": { "default_popup": "src/popup/popup.html" },
+  "browser_specific_settings": { "gecko": { "id": "companion@chessist.local", "strict_min_version": "128.0" } }
+}

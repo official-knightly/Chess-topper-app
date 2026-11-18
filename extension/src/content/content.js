@@ -1,0 +1,1 @@
+(()=>{if(window.top!==window)return;chrome.runtime.sendMessage({type:"chessist:page",url:location.href});})();

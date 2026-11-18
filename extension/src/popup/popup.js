@@ -1,0 +1,1 @@
+const status=document.getElementById("status");function check(){status.textContent="Checking…";chrome.runtime.sendMessage({type:"chessist:status"},r=>{status.textContent=chrome.runtime.lastError||!r?.connected?"Chessist desktop app is not reachable.":"Connected to Chessist on this device.";});}document.getElementById("retry").addEventListener("click",check);check();

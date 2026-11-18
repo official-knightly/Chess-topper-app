@@ -1,0 +1,1 @@
+import React from "react";export default function SettingInput({label,value,onChange,type="text",...props}){return <label className="setting-row">{label}<input type={type} value={value??""} onChange={e=>onChange?.(e.target.value)} {...props}/></label>;}

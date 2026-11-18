@@ -1,0 +1,1 @@
+import React from "react";export default function ShortcutPicker({label,value,onChange}){return <label className="setting-row">{label}<input value={value||""} onChange={e=>onChange?.(e.target.value)} placeholder="Press a shortcut"/></label>;}

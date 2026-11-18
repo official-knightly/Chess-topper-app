@@ -81,6 +81,7 @@ ipcMain.handle("chesscom:public-get", async (_event, apiPath) => {
   if (response.status === 429) throw new Error("Chess.com rate limit reached; retry later.");
   return { ok: response.ok, status: response.status, data: response.ok ? await response.json() : null };
 });
+ipcMain.handle("platform:open-chesscom", async () => { await shell.openExternal("https://www.chess.com/play/online"); return { opened: true }; });
 ipcMain.handle("lichess:request", (_event, options) => { if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.request(options.path, options); });
 ipcMain.handle("lichess:stream-game", (_event, gameId) => { if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.streamGame(gameId); });
 ipcMain.handle("lichess:stop-game-stream", (_event, gameId) => lichessApi?.stopStream(gameId));

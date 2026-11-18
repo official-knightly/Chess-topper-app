@@ -1,0 +1,1 @@
+import React from "react";export const KnightIcon=({size=22})=><span aria-hidden="true" style={{fontSize:size,lineHeight:1}}>♞</span>;export const LinkIcon=({size=16})=><span aria-hidden="true" style={{fontSize:size}}>↗</span>;
