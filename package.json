@@ -68,14 +68,14 @@
         "nsis",
         "msi"
       ],
-      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
-      "icon": "build/icon.ico"
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}"
     },
     "mac": {
       "target": [
         "dmg"
       ],
-      "artifactName": "Chessist-Local-${version}-${arch}.${ext}"
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
+      "icon": "build/icon.png"
     },
     "linux": {
       "target": [
