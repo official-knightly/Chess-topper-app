@@ -2,6 +2,11 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("chessist", {
   platform: process.platform,
+  window: {
+    minimize: () => ipcRenderer.invoke("window:minimize"),
+    toggleMaximize: () => ipcRenderer.invoke("window:toggle-maximize"),
+    close: () => ipcRenderer.invoke("window:close")
+  },
   engine: {
     start: () => ipcRenderer.invoke("engine:start"),
     analyze: options => ipcRenderer.invoke("engine:analyze", options),
