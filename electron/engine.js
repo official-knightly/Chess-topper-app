@@ -47,12 +47,13 @@ class UciEngine extends EventEmitter {
       this.ready = false;
       this.emit("exit", { code, signal });
     });
-    this.send("uci");
-    return new Promise((resolve, reject) => {
+    const ready = new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error("Stockfish did not answer uciok")), 10000);
       this._readyWaiters.push(() => { clearTimeout(timer); resolve(); });
       this.once("engineError", error => { clearTimeout(timer); reject(error); });
     });
+    this.send("uci");
+    return ready;
   }
 
   _consume(chunk) {
@@ -89,8 +90,10 @@ class UciEngine extends EventEmitter {
     if (!fen && !moves) throw new TypeError("fen or moves is required");
     this.stop();
     this.send("ucinewgame");
+    const ready = new Promise(resolve => this.once("readyok", resolve));
     this.send("isready");
-    await new Promise(resolve => this.once("readyok", resolve));
+    await ready;
+    if (this.fairnessLock) this.fairnessLock.assertCanAnalyze();
     this.send("position " + (fen ? `fen ${fen}` : `startpos moves ${moves.join(" ")}`));
     this.send(`setoption name MultiPV value ${Math.max(1, Math.min(5, multipv))}`);
     this.send(movetime ? `go movetime ${movetime}` : `go depth ${depth}`);
