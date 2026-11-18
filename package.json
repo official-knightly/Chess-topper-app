@@ -77,8 +77,7 @@
       "target": [
         "dmg"
       ],
-      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
-      "icon": "build/icon.png"
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}"
     },
     "linux": {
       "target": [
@@ -87,7 +86,6 @@
       ],
       "category": "Game",
       "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
-      "icon": "build/icon.png",
       "maintainer": "Official Knightly <noreply@github.com>"
     },
     "nsis": {
