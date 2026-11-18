@@ -1,0 +1,9 @@
+{
+  "appId": "ai.chessist.local",
+  "appName": "Chessist Local",
+  "webDir": "dist",
+  "server": { "androidScheme": "https" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0 }
+  }
+}
