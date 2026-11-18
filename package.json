@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test": "node --test electron/*.test.js && vitest run",
+    "test": "node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
     "start": "electron .",
     "dist:win": "electron-builder --win nsis msi",
     "dist:mac": "electron-builder --mac dmg",
