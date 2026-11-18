@@ -7,6 +7,7 @@ const { getDiagnostics } = require("./diagnostics");
 const { SecureStore } = require("./secure-store");
 const { LichessMonitor } = require("./lichess-monitor");
 const { LichessApi } = require("./lichess-api");
+const { authorizeEngineAnalysis } = require("./engine-authorization");
 
 let mainWindow;
 let engine;
@@ -67,6 +68,7 @@ ipcMain.handle("window:minimize", () => mainWindow?.minimize());
 ipcMain.handle("window:toggle-maximize", () => { if (mainWindow?.isMaximized()) mainWindow.unmaximize(); else mainWindow?.maximize(); });
 ipcMain.handle("window:close", () => mainWindow?.close());
 ipcMain.handle("fairness:get-state", () => fairness.snapshot());
+ipcMain.handle("engine:authorize", (_event, context) => authorizeEngineAnalysis(fairness, context));
 ipcMain.handle("auth:open-lichess", async (_event, url) => {
   const parsed = new URL(url);
   if (parsed.protocol !== "https:" || parsed.hostname !== "lichess.org" || !parsed.pathname.startsWith("/oauth")) throw new Error("Only official Lichess OAuth URLs are allowed.");

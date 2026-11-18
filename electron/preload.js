@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("chessist", {
     start: () => ipcRenderer.invoke("engine:start"),
     choose: () => ipcRenderer.invoke("engine:choose"),
     analyze: options => ipcRenderer.invoke("engine:analyze", options),
+    authorize: context => ipcRenderer.invoke("engine:authorize", context),
     stop: () => ipcRenderer.invoke("engine:stop"),
     setOption: (name, value) => ipcRenderer.invoke("engine:set-option", { name, value }),
     onInfo: callback => {
