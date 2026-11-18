@@ -26,6 +26,12 @@ contextBridge.exposeInMainWorld("chessist", {
       return () => ipcRenderer.removeListener("fairness:changed", listener);
     }
   },
+  lichess: {
+    request: options => ipcRenderer.invoke("lichess:request", options),
+    streamGame: gameId => ipcRenderer.invoke("lichess:stream-game", gameId),
+    stopGameStream: gameId => ipcRenderer.invoke("lichess:stop-game-stream", gameId),
+    onGameEvent: callback => { const listener = (_event, data) => callback(data); ipcRenderer.on("lichess:game-event", listener); return () => ipcRenderer.removeListener("lichess:game-event", listener); }
+  },
   auth: {
     openLichess: url => ipcRenderer.invoke("auth:open-lichess", url),
     storeLichessToken: token => ipcRenderer.invoke("auth:store-lichess-token", token),
