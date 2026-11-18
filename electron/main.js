@@ -11,6 +11,7 @@ const { LichessMonitor } = require("./lichess-monitor");
 const { LichessApi } = require("./lichess-api");
 const { authorizeEngineAnalysis } = require("./engine-authorization");
 const { ExtensionBridge } = require("./ws-server");
+const { autoUpdater } = require("electron-updater");
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
@@ -118,6 +119,8 @@ function requireTrustedRenderer(event) {
   throw new Error("Untrusted renderer IPC request rejected.");
 }
 
+ipcMain.handle("updates:get-version", event => { requireTrustedRenderer(event); return app.getVersion(); });
+
 ipcMain.handle("window:minimize", event => { requireTrustedRenderer(event); mainWindow?.minimize(); });
 ipcMain.handle("window:toggle-maximize", event => { requireTrustedRenderer(event); if (mainWindow?.isMaximized()) mainWindow.unmaximize(); else mainWindow?.maximize(); });
 ipcMain.handle("window:close", event => { requireTrustedRenderer(event); mainWindow?.close(); });
@@ -215,6 +218,29 @@ ipcMain.handle("diagnostics:get", event => { requireTrustedRenderer(event); retu
 if (gotLock) {
   app.whenReady().then(() => {
     secureStore = new SecureStore({ safeStorage, userDataPath: app.getPath("userData") });
+    if (app.isPackaged) {
+      autoUpdater.autoDownload = true;
+      autoUpdater.autoInstallOnAppQuit = true;
+      autoUpdater.on("error", error => sendToRenderer("updates:error", { message: error.message }));
+      autoUpdater.on("update-available", info => sendToRenderer("updates:available", { version: info.version }));
+      autoUpdater.on("update-not-available", info => sendToRenderer("updates:current", { version: info.version }));
+      autoUpdater.on("download-progress", progress => sendToRenderer("updates:progress", { percent: Math.round(progress.percent) }));
+      autoUpdater.on("update-downloaded", async info => {
+        const result = await dialog.showMessageBox(mainWindow, {
+          type: "info",
+          title: "Chessist update ready",
+          message: `Chessist ${info.version} has been downloaded.`,
+          detail: "Restart Chessist to install the update. Your settings and saved games will remain on this device.",
+          buttons: ["Restart now", "Later"],
+          defaultId: 0,
+          cancelId: 1
+        });
+        if (result.response === 0) autoUpdater.quitAndInstall();
+      });
+      setTimeout(() => autoUpdater.checkForUpdates().catch(error => {
+        sendToRenderer("updates:error", { message: error.message });
+      }), 12000);
+    }
     if (app.isPackaged) app.setAsDefaultProtocolClient("chessist"); else app.setAsDefaultProtocolClient("chessist", process.execPath, [path.resolve(process.argv[1])]);
     extensionBridge = new ExtensionBridge({ port: 27301, host: "127.0.0.1", onPage: payload => sendToRenderer("extension:page", payload) });
     extensionBridge.start();
