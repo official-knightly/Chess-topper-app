@@ -7,19 +7,22 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test": "node --test electron/*.test.js",
+    "test": "node --test electron/*.test.js && vitest run",
     "start": "electron .",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac",
-    "dist:linux": "electron-builder --linux",
-    "build:android": "npm run build && cap sync android",
-    "build:ios": "npm run build && cap sync ios"
+    "dist:win": "electron-builder --win nsis msi",
+    "dist:mac": "electron-builder --mac dmg",
+    "dist:linux": "electron-builder --linux AppImage deb",
+    "build:android": "npm run build && node scripts/ensure-capacitor-platform.mjs android && cap sync android",
+    "build:ios": "npm run build && node scripts/ensure-capacitor-platform.mjs ios && cap sync ios"
   },
   "dependencies": {
     "chess.js": "^1.4.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/ios": "^7.4.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
@@ -32,11 +35,39 @@
   "build": {
     "appId": "ai.chessist.local",
     "productName": "Chessist Local",
-    "directories": { "output": "release" },
-    "files": ["dist/**/*", "electron/**/*", "package.json"],
-    "extraResources": [{ "from": "engines", "to": "engines", "filter": ["**/*"] }],
-    "win": { "target": ["nsis", "msi"] },
-    "mac": { "target": ["dmg"] },
-    "linux": { "target": ["AppImage", "deb"] }
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "engines",
+        "to": "engines",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "msi"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }
