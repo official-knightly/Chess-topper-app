@@ -40,7 +40,7 @@ jobs:
           retention-days: 14
 
   browser-companion:
-    name: Build browser companion
+    name: Package Chromium and Firefox companions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,17 +48,17 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: npm run build:firefox-ext
-      - name: Upload browser companion
+      - run: npm run package:extensions
+      - name: Upload browser extension packages
         uses: actions/upload-artifact@v4
         with:
-          name: chessist-browser-companion
-          path: release/firefox-extension/**
+          name: chessist-browser-extensions
+          path: release/*.zip
           if-no-files-found: error
           retention-days: 14
 
   publish-release:
-    name: Publish installers to GitHub Releases
+    name: Publish only installable app and extension packages
     needs: [desktop, browser-companion]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
@@ -79,4 +79,4 @@ jobs:
             release-assets/chessist-desktop-win/*
             release-assets/chessist-desktop-mac/*
             release-assets/chessist-desktop-linux/*
-            release-assets/chessist-browser-companion/**/*
+            release-assets/chessist-browser-extensions/*.zip
