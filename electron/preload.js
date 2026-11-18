@@ -27,6 +27,9 @@ contextBridge.exposeInMainWorld("chessist", {
       return () => ipcRenderer.removeListener("fairness:changed", listener);
     }
   },
+  platform: {
+    chesscomGet: apiPath => ipcRenderer.invoke("chesscom:public-get", apiPath)
+  },
   lichess: {
     request: options => ipcRenderer.invoke("lichess:request", options),
     streamGame: gameId => ipcRenderer.invoke("lichess:stream-game", gameId),
