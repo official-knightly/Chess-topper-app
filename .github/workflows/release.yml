@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-                - run: npm install
+      - run: npm install
       - run: npm test
       - run: npm run dist:${{ matrix.target }}
       - name: Upload desktop installers
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-                - run: npm install
+      - run: npm install
       - run: npm run build:firefox-ext
       - name: Upload browser companion
         uses: actions/upload-artifact@v4
