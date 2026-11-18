@@ -44,5 +44,12 @@ contextBridge.exposeInMainWorld("chessist", {
     onCallback: callback => listen("auth:callback", callback),
     onError: callback => listen("platform:error", callback)
   },
+  updates: {
+    getVersion: () => ipcRenderer.invoke("updates:get-version"),
+    onAvailable: callback => listen("updates:available", callback),
+    onCurrent: callback => listen("updates:current", callback),
+    onProgress: callback => listen("updates:progress", callback),
+    onError: callback => listen("updates:error", callback)
+  },
   diagnostics: () => ipcRenderer.invoke("diagnostics:get")
 });
