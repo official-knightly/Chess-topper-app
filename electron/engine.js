@@ -84,8 +84,8 @@ class UciEngine extends EventEmitter {
     this.send(`setoption name ${name} value ${value}`);
   }
 
-  async analyze({ fen, moves, depth = 18, movetime, multipv = 1 } = {}) {
-    if (this.fairnessLock) this.fairnessLock.assertCanAnalyze();
+  async analyze({ fen, moves, depth = 18, movetime, multipv = 1, context } = {}) {
+    if (this.fairnessLock) this.fairnessLock.assertCanAnalyze(context);
     if (!this.ready) throw new Error("Stockfish is not ready");
     if (!fen && !moves) throw new TypeError("fen or moves is required");
     this.stop();
@@ -93,7 +93,7 @@ class UciEngine extends EventEmitter {
     const ready = new Promise(resolve => this.once("readyok", resolve));
     this.send("isready");
     await ready;
-    if (this.fairnessLock) this.fairnessLock.assertCanAnalyze();
+    if (this.fairnessLock) this.fairnessLock.assertCanAnalyze(context);
     this.send("position " + (fen ? `fen ${fen}` : `startpos moves ${moves.join(" ")}`));
     this.send(`setoption name MultiPV value ${Math.max(1, Math.min(5, multipv))}`);
     this.send(movetime ? `go movetime ${movetime}` : `go depth ${depth}`);
