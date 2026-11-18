@@ -1,0 +1,20 @@
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("./fonts/instrument-sans.woff2") format("woff2");
+  font-display: swap;
+}
+:root { color-scheme: dark; font-family: "Instrument Sans", Inter, system-ui, sans-serif; background: #09080d; color: #f4f0fa; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(ellipse at 52% 30%, #1b1428 0%, #0d0b12 46%, #09080d 78%); }
+.stage-one { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 22px; text-align: center; }
+.brand-mark { width: 58px; height: 58px; display: grid; place-items: center; border: 1px solid #624093; border-radius: 18px; background: #21152f; color: #b995f2; font-size: 32px; box-shadow: 0 0 48px #6d3fb533; }
+.eyebrow { margin: 28px 0 14px; color: #a98bd4; font-size: 11px; letter-spacing: .22em; font-weight: 700; }
+h1 { margin: 0; font-size: clamp(42px, 8vw, 76px); line-height: .98; letter-spacing: -.055em; font-weight: 650; }
+h1 span { color: #a984e0; }
+.description { max-width: 430px; margin: 22px 0 30px; color: #aaa3b4; font-size: 15px; line-height: 1.65; }
+.status-card { width: min(100%, 430px); display: grid; gap: 14px; padding: 18px 20px; border: 1px solid #30273d; border-radius: 16px; background: #111018cc; text-align: left; color: #d8d1e2; font-size: 13px; }
+.status-card > div:first-child { display: flex; align-items: center; gap: 10px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #8bce91; box-shadow: 0 0 12px #8bce9180; }
+.locked { color: #f1a4a4; }
+.unlocked { color: #9bcea2; }
+.footnote { margin-top: 24px; color: #716a7c; font-size: 11px; letter-spacing: .04em; }
