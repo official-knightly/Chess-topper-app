@@ -73,6 +73,12 @@ ipcMain.handle("auth:open-lichess", async (_event, url) => {
   await shell.openExternal(parsed.toString());
   return { opened: true };
 });
+ipcMain.handle("chesscom:public-get", async (_event, apiPath) => {
+  if (typeof apiPath !== "string" || !/^\\/player\\/[a-zA-Z0-9_-]+(?:\\/(?:stats|games\\/archives|games\\/\\d{4}\\/\\d{2}))?$/.test(apiPath)) throw new Error("Chess.com endpoint is not allowed.");
+  const response = await fetch("https://api.chess.com/pub" + apiPath, { headers: { Accept: "application/json", "User-Agent": "ChessistLocal/0.1 (+https://github.com/official-knightly/Chess-topper-app-)" } });
+  if (response.status === 429) throw new Error("Chess.com rate limit reached; retry later.");
+  return { ok: response.ok, status: response.status, data: response.ok ? await response.json() : null };
+});
 ipcMain.handle("lichess:request", (_event, options) => { if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.request(options.path, options); });
 ipcMain.handle("lichess:stream-game", (_event, gameId) => { if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.streamGame(gameId); });
 ipcMain.handle("lichess:stop-game-stream", (_event, gameId) => lichessApi?.stopStream(gameId));
