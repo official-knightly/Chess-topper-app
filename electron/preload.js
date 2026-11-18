@@ -21,5 +21,11 @@ contextBridge.exposeInMainWorld("chessist", {
       return () => ipcRenderer.removeListener("fairness:changed", listener);
     }
   },
+  auth: {
+    openLichess: url => ipcRenderer.invoke("auth:open-lichess", url),
+    storeLichessToken: token => ipcRenderer.invoke("auth:store-lichess-token", token),
+    clearLichess: () => ipcRenderer.invoke("auth:clear-lichess"),
+    onError: callback => { const listener = (_event, error) => callback(error); ipcRenderer.on("platform:error", listener); return () => ipcRenderer.removeListener("platform:error", listener); }
+  },
   diagnostics: () => ipcRenderer.invoke("diagnostics:get")
 });
