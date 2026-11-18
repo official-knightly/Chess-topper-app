@@ -15,7 +15,6 @@ contextBridge.exposeInMainWorld("chessist", {
   },
   fairness: {
     getState: () => ipcRenderer.invoke("fairness:get-state"),
-    reportGameState: state => ipcRenderer.invoke("fairness:report-game-state", state),
     onChange: callback => {
       const listener = (_event, state) => callback(state);
       ipcRenderer.on("fairness:changed", listener);
