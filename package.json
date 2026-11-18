@@ -9,9 +9,9 @@
     "build": "vite build",
     "test": "node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
     "start": "electron .",
-    "dist:win": "electron-builder --win nsis msi",
-    "dist:mac": "electron-builder --mac dmg",
-    "dist:linux": "electron-builder --linux AppImage deb",
+    "dist:win": "npm run build && electron-builder --win nsis msi",
+    "dist:mac": "npm run build && electron-builder --mac dmg",
+    "dist:linux": "npm run build && electron-builder --linux AppImage deb",
     "build:android": "npm run build && node scripts/ensure-capacitor-platform.mjs android && cap sync android",
     "build:ios": "npm run build && node scripts/ensure-capacitor-platform.mjs ios && cap sync ios"
   },
