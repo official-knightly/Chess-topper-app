@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, safeStorage } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("node:path");
 const { UciEngine } = require("./engine");
 const { FairnessLock } = require("./fairness-lock");
@@ -34,9 +34,9 @@ function broadcastFairness() {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("fairness:changed", fairness.snapshot());
 }
 
-ipcMain.handle("fairness:get-state", () => fairness.snapshot());
-ipcMain.handle("fairness:report-game-state", (_event, state) => {
-  if (!state || typeof state !== "object") throw new TypeError("Game state is required");
+// Platform monitors will call this from the main process after verifying official game events.
+// Renderer IPC is deliberately not allowed to set or clear the fairness state.
+function updateVerifiedPlatformGameState(state) {
   const snapshot = fairness.updateGame({
     platform: String(state.platform || ""),
     gameId: String(state.gameId || ""),
@@ -45,7 +45,9 @@ ipcMain.handle("fairness:report-game-state", (_event, state) => {
   });
   broadcastFairness();
   return snapshot;
-});
+}
+
+ipcMain.handle("fairness:get-state", () => fairness.snapshot());
 
 ipcMain.handle("engine:start", async () => {
   if (engine) return { ready: true, path: enginePath };
