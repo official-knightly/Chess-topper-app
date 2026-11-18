@@ -58,6 +58,7 @@ export default function SpectatePage({ fairness }) {
       berserkEngine.stop();
       setBest("");
       setPv("");
+      setInfo(null);
       setStatus("Engine locked: you are playing an active online game.");
     }
   }, [fairness?.locked]);

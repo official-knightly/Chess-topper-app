@@ -10,7 +10,8 @@ A local-first chess desktop and mobile workspace built with React, Vite, Electro
 - User-selected UCI engine executable from the desktop app.
 - Lichess OAuth 2.0 PKCE helper, encrypted desktop token storage, authenticated Board API proxy, game stream and in-app seek/challenge/AI play controls.
 - Main-process Lichess event monitor that locks engine analysis while the signed-in user is playing and unlocks after the game finishes.
-- Public Lichess spectating by username and TV channel, with engine analysis and engine switching.
+- Public Lichess spectating by username and TV channel, with best-move arrows and live switching between native UCI engines and your Berserk WASM engine.
+- Berserk WASM worker and generated loader are sourced from the matching `official-knightly/Berserk-web` build; the engine search path requests main-process fairness authorization before every search.
 - Public Lichess and Chess.com profile adapters; World Chess intentionally remains an explicit unsupported stub rather than scraping.
 - Mocked API tests plus UCI, binary resolver, updater and fairness-lock tests.
 - Capacitor configuration and CI workflows for desktop installers, Android debug APK and iOS Simulator build.

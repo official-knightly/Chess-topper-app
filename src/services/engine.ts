@@ -37,6 +37,7 @@ class BerserkEngine {
   error?: string;
   private listeners = new Set<Listener>();
   ready!: Promise<void>;
+  private rejectReady: ((error: Error) => void) | null = null;
 
   subscribe(fn: Listener) {
     this.listeners.add(fn);
@@ -61,6 +62,7 @@ class BerserkEngine {
     this.emit();
 
     this.ready = new Promise<void>((resolve, reject) => {
+      this.rejectReady = reject;
       const workerUrl = import.meta.env.DEV
         ? "/engine/engine-worker.js"
         : new URL("../engine/engine-worker.js", import.meta.url).toString();
@@ -70,6 +72,7 @@ class BerserkEngine {
       worker.onmessage = event => {
         const message = event.data || {};
         if (message.type === "ready") {
+          this.rejectReady = null;
           this.status = "ready";
           this.progress = 1;
           this.emit();
@@ -105,6 +108,8 @@ class BerserkEngine {
   }
 
   private fail(error: Error) {
+    this.rejectReady?.(error);
+    this.rejectReady = null;
     this.status = "error";
     this.error = error.message;
     this.emit();
@@ -142,6 +147,8 @@ class BerserkEngine {
     this.worker?.terminate();
     this.worker = null;
     const error = new Error("Berserk worker stopped.");
+    this.rejectReady?.(error);
+    this.rejectReady = null;
     this.pending.forEach(pending => pending.reject(error));
     this.pending.clear();
     this.status = "idle";
