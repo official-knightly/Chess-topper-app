@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
-    "test": "node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
+    "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/*.test.js && vitest run src/services/platform-adapters.test.js",
     "start": "electron .",
     "dist:win": "npm run build && electron-builder --win nsis msi",
     "dist:mac": "npm run build && electron-builder --mac dmg",
