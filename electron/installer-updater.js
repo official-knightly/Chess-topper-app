@@ -10,10 +10,10 @@ function installerAsset(release, arch) {
   const version = /^v(\d+\.\d+\.\d+)$/.exec(release.tag_name)?.[1]
   if (!version || !['x64', 'arm64', 'ia32'].includes(arch)) return null
 
-  const base = `Chessist Setup ${version}`
-  const names = [`${base}-${arch}.exe`]
-  // Releases before the filename included the architecture shipped x64 installers.
-  if (arch === 'x64') names.push(`${base}.exe`)
+  const names = [`Chess-Topper-${version}-${arch}.exe`]
+  // Accept older Chessist installer names so existing installs can update.
+  names.push(`Chessist.Setup.${version}-${arch}.exe`, `Chessist Setup ${version}-${arch}.exe`)
+  if (arch === 'x64') names.push(`Chessist.Setup.${version}.exe`, `Chessist Setup ${version}.exe`)
   for (const name of names) {
     const asset = release.assets?.find(a => a.name === name || a.name === name.replaceAll(' ', '.'))
     if (asset?.state === 'uploaded' && Number.isSafeInteger(asset.size) && asset.size > 0 &&

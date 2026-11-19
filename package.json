@@ -1,8 +1,8 @@
 {
-  "name": "chessist-local",
-  "version": "1.0.2",
+  "name": "chess-topper-desktop",
+  "version": "1.0.3",
   "private": true,
-  "description": "Chessist Local native desktop chess application",
+  "description": "Chess Topper native desktop chess application",
   "main": "electron/main.js",
   "author": {
     "name": "Official Knightly",
@@ -45,7 +45,7 @@
   },
   "build": {
     "appId": "ai.chessist.local",
-    "productName": "Chessist",
+    "productName": "Chess Topper",
     "asar": true,
     "directories": {
       "output": "release"
@@ -82,7 +82,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Chessist Setup ${version}-${arch}.${ext}",
+      "artifactName": "Chess-Topper-${version}-${arch}.${ext}",
       "extraResources": [
         {
           "from": "overlay/bin/Release/net48/ChessistOverlay.exe",
@@ -110,7 +110,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "artifactName": "Chessist Setup ${version}-${arch}.${ext}"
+      "artifactName": "Chess-Topper-${version}-${arch}.${ext}"
     },
     "publish": [
       {

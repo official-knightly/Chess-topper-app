@@ -10,7 +10,7 @@ import { downloadInstaller, installerAsset, launchInstaller } from './installer-
 
 const content = Buffer.from('test installer contents')
 const digest = `sha256:${createHash('sha256').update(content).digest('hex')}`
-const asset = { name: 'Chessist.Setup.2.1.0-x64.exe', state: 'uploaded', size: content.length, digest }
+const asset = { name: 'Chess-Topper-2.1.0-x64.exe', state: 'uploaded', size: content.length, digest }
 
 function mockUpdater({ installed, release, git }) {
   const module = { exports: {} }
@@ -83,7 +83,7 @@ describe('update preview', () => {
 })
 
 describe('Windows release asset selection', () => {
-  const arm = { ...asset, name: 'Chessist.Setup.2.1.0-arm64.exe' }
+  const arm = { ...asset, name: 'Chess-Topper-2.1.0-arm64.exe' }
   const legacy = { ...asset, name: 'Chessist.Setup.2.1.0.exe' }
   const release = { tag_name: 'v2.1.0', assets: [arm, legacy, asset] }
 

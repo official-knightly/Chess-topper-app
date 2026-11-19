@@ -10,7 +10,7 @@ import AboutPage from './pages/AboutPage'
 
 const piecesKey = (fen) => (fen ? fen.split(' ')[0] : '')
 const brand = {
-  name: 'Chessist',
+  name: 'Chess Topper',
   caption: 'Desktop analysis',
   mark: null,
 }

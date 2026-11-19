@@ -1,4 +1,4 @@
-// Chessist World Chess page adapter.
+// Chess Topper World Chess page adapter.
 // Detects public player profiles and makes their official URL available to
 // the extension. World Chess does not publish a documented public game/FEN API,
 // so this adapter does not invent board data or claim live move analysis.

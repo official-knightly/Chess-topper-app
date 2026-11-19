@@ -1,9 +1,9 @@
-name: Chessist Desktop Releases
+name: Chess Topper Desktop Releases
 
 on:
   workflow_dispatch:
   push:
-    branches: [chessist-desktop-app]
+    branches: [chess-topper-desktop-app]
     tags: ["v*"]
 
 permissions:
@@ -40,21 +40,24 @@ jobs:
       - name: Upload desktop installers
         uses: actions/upload-artifact@v4
         with:
-          name: chessist-desktop-${{ matrix.target }}
+          name: chess-topper-desktop-${{ matrix.target }}
           path: |
-            release/Chessist Setup *.exe
-            release/Chessist-Local-*.dmg
-            release/Chessist-Local-*.AppImage
-            release/Chessist-Local-*.deb
+            release/*.exe
+            release/Chess Topper-Local-*.dmg
+            release/Chess Topper-Local-*.AppImage
+            release/Chess Topper-Local-*.deb
             release/latest*.yml
             release/*.blockmap
           if-no-files-found: error
           retention-days: 14
+            !release/bun-ws-worker.exe
+            !release/builder-debug.yml
+            !release/*.zip
 
   publish-release:
     name: Publish standalone desktop installers
     needs: [desktop]
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/chessist-desktop-app' || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/chess-topper-desktop-app' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Download all build artifacts
@@ -65,19 +68,23 @@ jobs:
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.2' }}
-          target_commitish: chessist-desktop-app
-          name: Chessist ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.2' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.3' }}
+          target_commitish: chess-topper-desktop-app
+          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.3' }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            release-assets/chessist-desktop-win/Chessist Setup *.exe
-            release-assets/chessist-desktop-win/latest*.yml
-            release-assets/chessist-desktop-win/*.blockmap
-            release-assets/chessist-desktop-mac/*.dmg
-            release-assets/chessist-desktop-mac/latest*.yml
-            release-assets/chessist-desktop-mac/*.blockmap
-            release-assets/chessist-desktop-linux/*.AppImage
-            release-assets/chessist-desktop-linux/*.deb
-            release-assets/chessist-desktop-linux/latest*.yml
-            release-assets/chessist-desktop-linux/*.blockmap
+            release-assets/chess-topper-desktop-win/*.exe
+            !release-assets/chess-topper-desktop-win/bun-ws-worker.exe
+            !release-assets/chess-topper-desktop-win/*.zip
+            release-assets/chess-topper-desktop-win/latest*.yml
+            release-assets/chess-topper-desktop-win/*.blockmap
+            release-assets/chess-topper-desktop-mac/*.dmg
+            release-assets/chess-topper-desktop-mac/latest*.yml
+            release-assets/chess-topper-desktop-mac/*.blockmap
+            release-assets/chess-topper-desktop-linux/*.AppImage
+            release-assets/chess-topper-desktop-linux/*.deb
+            release-assets/chess-topper-desktop-linux/latest*.yml
+            release-assets/chess-topper-desktop-linux/*.blockmap
+            !release-assets/chess-topper-desktop-mac/*.zip
+            !release-assets/chess-topper-desktop-linux/*.zip

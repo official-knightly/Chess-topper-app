@@ -22,7 +22,7 @@ function installedOnWindows() {
   const { app } = require('electron')
   // An unpacked build also has app.isPackaged. NSIS adds the adjacent uninstaller.
   return process.platform === 'win32' && app?.isPackaged &&
-    fs.existsSync(path.join(path.dirname(app.getPath('exe')), 'Uninstall Chessist.exe'))
+    (fs.existsSync(path.join(path.dirname(app.getPath('exe')), 'Uninstall Chess Topper.exe')) || fs.existsSync(path.join(path.dirname(app.getPath('exe')), 'Uninstall Chessist.exe')))
 }
 
 function githubFetch(url, options = {}) {
@@ -30,7 +30,7 @@ function githubFetch(url, options = {}) {
   const request = {
     ...options,
     credentials: 'omit',
-    headers: { 'User-Agent': 'Chessist', ...options.headers },
+    headers: { 'User-Agent': 'Chess Topper', ...options.headers },
   }
   return net ? net.fetch(url, request) : fetch(url, request)
 }

@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import Check from '../components/controls/Check'
 
-const VERSION = '3.0.4'
+const VERSION = '1.0.3'
 // Baked at build time when git is available (see vite.config.js). Empty for source-ZIP builds.
 const BUILD_SHA = (typeof __BUILD_SHA__ === 'string' ? __BUILD_SHA__ : '')
-const RELEASES_URL = 'https://github.com/imluri/Chessist/releases'
+const RELEASES_URL = 'https://github.com/official-knightly/Chess-topper-app-/releases'
 
 function Link({ href, children }) {
   return (
@@ -195,14 +195,14 @@ export default function AboutPage({ updateStatus, onUpdateStatus }) {
     <div className="page-content" style={{ lineHeight: 1.65 }}>
       <header className="page-heading">
         <h1>About</h1>
-        <p>Chessist v{VERSION}</p>
+        <p>Chess Topper v{VERSION}</p>
       </header>
       <p style={{ color: 'rgb(var(--fg-muted))', margin: '0 8px 14px' }}>
-        Live Stockfish evaluation for Chess.com and Lichess — a desktop app with a transparent,
+        Live Stockfish evaluation for compatible Chess.com and Lichess boards, plus World Chess public profile lookup — a desktop app with a transparent,
         screen-capture-invisible board overlay.
       </p>
       <div style={{ display: 'grid', gap: 4, padding: '0 8px' }}>
-        <Link href="https://github.com/imluri/Chessist">GitHub repository</Link>
+        <Link href="https://github.com/official-knightly/Chess-topper-app-">GitHub repository</Link>
         <Link href="https://stockfishchess.org/">Stockfish (GPL)</Link>
       </div>
 
