@@ -1,64 +1,109 @@
-# Chessist Local
+<p align="center"><img src="extension/icons/icon128.png" width="96" height="96" alt="Chessist"></p>
+<h1 align="center">Chessist</h1>
+<p align="center">Live Stockfish evaluation for Chess.com and Lichess — a desktop app + browser extension.</p>
+<img width="1609" height="939" alt="chessist" src="https://github.com/user-attachments/assets/754eead5-5897-4954-81ce-8d2334497c43" />
 
-Chessist Local is a **native desktop application**, built with Electron, React and Vite. It is not a hosted website or a browser-only chessboard. The Vite renderer is packaged inside the Electron application and the development command launches Electron.
+---
+
+## What it is
+
+Two parts working together:
+
+- **Chessist desktop app** (Electron + React) — runs native Stockfish, owns all settings, shows live
+  evaluation, and (optionally) draws a transparent, screen-capture-invisible overlay on the board.
+- **Chessist browser extension** — reads the board on chess.com / lichess.org, sends positions to the
+  app, draws in-page arrows, and plays auto-moves.
+
+Windows 10/11. The transparent overlay is Windows-only.
 
 ## Features
-- Lichess OAuth 2.0 PKCE with token exchange in the Electron main process and OS-encrypted token storage.
-- Play real Lichess games inside Chessist through the official Board API: seek opponents, challenge friends or Lichess AI, live board updates, clocks, chat, draw, abort and resign.
-- Chess.com public profile, rating and archive lookup through the Published-Data API. The **Open Chess.com Play** action launches Chess.com's official interface because its public API does not support submitting moves in human games.
-- Live Lichess spectator games and TV channels.
-- Berserk WASM analysis and local games against Berserk using the supplied engine adapter and the existing WASM URL.
-- Optional native UCI / Stockfish executable selection.
-- PGN library stored locally, FEN/PGN analysis, daily puzzles, opening explorer and engine benchmark.
-- Optional browser companion reports only whether a Lichess or Chess.com tab is open. It does not read board state, extract moves, display engine suggestions or automate input.
-- Fair-play protection: engine searches are blocked while the connected Lichess account is a participant in an active game.
 
-## Requirements
-- Node.js 22 or newer.
-- Windows 10/11, macOS or Linux for the desktop build.
-- Internet access for Lichess, Chess.com public data and the remote Berserk WASM download.
+- **Native Stockfish** — one persistent engine per session; the transposition table is reused across
+  moves (reset only on a new game) with a large hash and multi-threading for fast, deepening analysis.
+- **Three render modes** — *Overlay* (transparent native window on the board), *In-page* (arrows drawn
+  on the chess site), or *App* (the desktop window draws its own board + best-move arrows).
+- **Live board + eval** in the app — score, depth, best move, kNPS, and a board rendered from the
+  current position (greys out and reports "Disconnected" when no game is active).
+- **Auto-move** with human-like timing, best/opponent/alternative arrows, player-color perspective,
+  and win/loss balancing — all configured in the app.
+- **No setup.bat, no Python** — the app downloads Stockfish on first run; the extension is a pure
+  WebSocket client and the app guides loading it.
 
-## Run the desktop application
-```sh
+## Install
+
+> Prebuilt installers will land on the [Releases](https://github.com/imluri/Chessist/releases) page.
+> Until then, install from source — one click builds **and** installs it.
+
+**Requirements:** [Node 20+](https://nodejs.org/) and the
+[.NET SDK 8](https://dotnet.microsoft.com/download) (used to build the overlay).
+
+1. Get the code — clone it (recommended; enables in-app auto-update):
+   ```bash
+   git clone https://github.com/imluri/Chessist.git
+   ```
+   …or download the ZIP from the repo / a release and extract it.
+2. Double-click **`install.bat`**. It requests administrator rights (one UAC prompt — needed to build
+   the installer), checks Node/.NET, installs dependencies and the overlay, then builds the Windows
+   installer (`npm run dist`) and runs it. **Chessist installs and launches automatically.**
+   - If the installer build can't run on your machine, it falls back to a portable **Chessist**
+     shortcut in the project folder — launch from there and keep the folder where it is.
+3. First launch downloads Stockfish — watch the **Setup** tab.
+4. On the **Setup** tab, follow the **Browser extension** card: it reveals the bundled extension
+   folder and walks you through `chrome://extensions` → Developer mode → **Load unpacked**. Works on
+   any Chromium browser — **Chrome, Brave, or Edge**.
+5. Open a game on chess.com or lichess.org. The board and evaluation appear in the app; choose your
+   render mode and tweak settings via the **gear** (Settings → Game / Engine).
+
+**Updating:** open **About → Updates**. Windows installer builds with in-app updates can download
+the next stable release and restart Chessist from **Update & restart**. Older installer builds
+need one manual upgrade to get this feature. Git clones can update in place from release tags
+or from `main` with the beta channel. Source ZIP builds link to the release page.
+If your browser loaded the bundled extension folder, the extension reloads itself when a newer
+version arrives in that folder. Reload older extension versions once to enable this behavior.
+After an extension reload, refresh any chess tabs that were already open.
+
+## Using the app
+
+- **Evaluation** — the live board, score, and best-move arrow (one purple arrow by default; enable
+  *Alternative arrows* for the yellow/red lines).
+- **Settings** (gear, or the sidebar item) — a modal with **Game** (depth, render mode, player color,
+  arrows, auto-move + timing, behavior, win/loss balance) and **Engine** (skill, ELO, threads, hash).
+- **Setup** — Stockfish / Overlay / Extension status, each in its own card, plus a re-download button.
+
+The extension popup shows whether it can reach the desktop app and whether Stockfish is ready.
+If Stockfish is unavailable, open **Setup → Stockfish engine** for the error and a retry button.
+
+## Develop
+
+Requirements: Node 20+, .NET SDK 8 (only to build the C# overlay).
+
+```bash
 npm install
-npm run dev
+npm run build:overlay     # builds the C# overlay helper (overlay/bin/Release/net48)
+npm run dev               # Vite + Electron
 ```
-On Windows, `install.bat` installs dependencies and starts the Electron app.
 
-To build the renderer and launch the packaged Electron shell locally:
-```sh
-npm run build
-npm start
-``
+Build an installer: `npm run dist` (output in `release/`). The installer includes a standalone
+Bun executable for the local WebSocket listener. The first build may download Bun's Windows x64
+baseline runtime. CI builds the overlay and installer on a `v*.*.*` tag.
 
-## Lichess setup
-1. Create a personal OAuth application in Lichess account settings.
-2. Register the redirect URI `chessist://oauth/lichess`.
-3. Enter the OAuth client ID in Chessist Settings.
-4. Connect and approve the requested scopes.
-5. Open Play to seek, challenge a player or challenge the Lichess AI.
+The browser extension connects to the Bun service at `ws://127.0.0.1:27301`. Bun handles browser
+requests and runs native Stockfish. Electron hosts the UI, saves settings, and manages the
+installer and overlay. The service sends UI and overlay events over its process pipes.
 
-Tokens are exchanged in Electron's main process and encrypted with the operating system's secure storage. If OS secure storage is unavailable, token saving fails closed rather than writing a plaintext token.
+## Project structure
 
-## Chess.com
-Chessist can retrieve public player data using the official Published-Data API. It cannot control human games through that API. Chess.com play opens the official Chess.com interface in the system browser; no DOM scraping, move automation or unofficial game-control endpoint is used.
+```
+Chessist/
+├── electron/      # Electron main, Bun WebSocket worker, Stockfish, overlay driver, IPC
+├── src/           # React renderer (sidebar, Evaluation, Settings modal, board, controls)
+├── overlay/       # C# overlay helper — transparent, capture-invisible window (stdin-driven)
+├── extension/     # browser extension (load unpacked)
+├── scripts/       # dev helpers (build-overlay.ps1)
+└── build/         # app / installer icon
+```
 
-## Engine
-Berserk runs in a WebAssembly worker inside the desktop app. The adapter is `src/services/engine.ts`; it loads the existing WASM binary from the Berserk Web repository. Native UCI engines are optional and can be selected from the Engine page. No third-party engine executable is bundled by default; provide a locally installed engine and NNUE files where required.
+## Credits
 
-## Fair play
-Chessist does not provide engine assistance or automated moves in online games where the connected user is a participant. The Electron main process monitors Lichess account game events and enforces the lock for both native UCI and Berserk WASM analysis. If Lichess game status cannot be verified while connected, Chessist fails closed and pauses analysis until verification recovers. Spectator analysis, local games and post-game review remain available when verification is healthy.
-
-## Browser companion
-Load `extension/` as an unpacked Chromium extension. It connects to the local desktop bridge at `127.0.0.1:27301`. The bridge accepts only loopback connections from browser extension origins and validates supported-site hostnames.
-
-## Tests and desktop packaging
-```sh
-npm test
-npm run build
-npm run build:firefox-ext
-npm run dist:win
-npm run dist:mac
-npm run dist:linux
-``
-GitHub Actions runs CI and creates Windows, macOS and Linux release artifacts. Native binaries are not bundled unless you add appropriately licensed binaries to `engines/`.
+Created by [imluri](https://github.com/imluri/). Powered by
+[Stockfish](https://stockfishchess.org/) (GPL, downloaded at first run). MIT licensed (app + extension).
