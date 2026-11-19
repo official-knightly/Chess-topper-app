@@ -4,7 +4,7 @@
 // so this adapter does not invent board data or claim live move analysis.
 (() => {
   'use strict';
-  const PROFILE_PATH = /^\\/profile\\/(\\d+)(?:\\/|$)/i;
+  const PROFILE_PATH = /^\/profile\/(\d+)(?:\/|$)/i;
   let lastUrl = '';
   function publishProfile() {
     const url = new URL(location.href);
