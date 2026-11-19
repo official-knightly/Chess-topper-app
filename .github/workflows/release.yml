@@ -45,28 +45,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  browser-companion:
-    name: Package Chromium and Firefox companions
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install
-      - run: npm run package:extensions
-      - name: Upload browser extension packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: chessist-browser-extensions
-          path: release/*.zip
-          if-no-files-found: error
-          retention-days: 14
-
   publish-release:
     name: Publish only installable app and extension packages
     needs: [desktop, browser-companion]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Download all build artifacts
@@ -77,12 +59,12 @@ jobs:
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Chessist ${{ github.ref_name }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.1' }}
+          target_commitish: chessist-desktop-app
+          name: Chessist ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.1' }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
             release-assets/chessist-desktop-win/*
             release-assets/chessist-desktop-mac/*
             release-assets/chessist-desktop-linux/*
-            release-assets/chessist-browser-extensions/*.zip
