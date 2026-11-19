@@ -116,7 +116,6 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1040, height: 720, minWidth: 720, minHeight: 480,
     title: 'Chessist', backgroundColor: '#000000',
-    icon: path.join(__dirname, '..', 'build', 'icon.png'),
     frame: false, titleBarStyle: 'hidden', autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

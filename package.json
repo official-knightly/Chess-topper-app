@@ -27,7 +27,8 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "ws": "8.18.3",
-    "electron-updater": "^6.6.2"
+    "electron-updater": "^6.6.2",
+    "bun": "1.4.4"
   },
   "devDependencies": {
     "concurrently": "9.2.1",
@@ -36,7 +37,8 @@
     "electron-builder": "26.0.12",
     "vite": "6.3.5",
     "vitest": "3.2.4",
-    "wait-on": "8.0.4"
+    "wait-on": "8.0.4",
+    "@vitejs/plugin-react": "^4.3.4"
   },
   "build": {
     "appId": "ai.chessist.local",
@@ -49,7 +51,8 @@
       "dist/**/*",
       "electron/**/*",
       "package.json",
-      "node_modules/ws/**/*"
+      "node_modules/ws/**/*",
+      "node_modules/bun/**/*"
     ],
     "extraResources": [
       {
@@ -57,6 +60,14 @@
         "to": "engines",
         "filter": [
           "**/*"
+        ]
+      },
+      {
+        "from": "node_modules/bun/bin",
+        "to": "bun",
+        "filter": [
+          "bun",
+          "bun.exe"
         ]
       }
     ],

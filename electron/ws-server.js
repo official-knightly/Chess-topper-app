@@ -1,5 +1,6 @@
 const { spawn } = require('node:child_process')
 const { join } = require('node:path')
+const fs = require('node:fs')
 const { createInterface } = require('node:readline')
 
 const PORT = 27301
@@ -48,7 +49,12 @@ class Bridge {
   }
 
   _launch() {
-    const bun = join(__dirname, '..', 'node_modules', 'bun', 'bin', process.platform === 'win32' ? 'bun.exe' : 'bun')
+    const bunName = process.platform === 'win32' ? 'bun.exe' : 'bun'
+    const packagedBun = process.resourcesPath
+      ? join(process.resourcesPath, 'bun', bunName)
+      : ''
+    const localBun = join(__dirname, '..', 'node_modules', 'bun', 'bin', bunName)
+    const bun = packagedBun && fs.existsSync(packagedBun) ? packagedBun : localBun
     const args = this.executable ? [String(this.port)] : [join(__dirname, 'bun-ws-worker.cjs'), String(this.port)]
     const env = { ...process.env }
     delete env.BUN_BE_BUN
