@@ -1,257 +1,364 @@
-"use strict";
-const { app, BrowserWindow, ipcMain, safeStorage, shell, dialog } = require("electron");
-const path = require("node:path");
-const fs = require("node:fs");
-const { UciEngine } = require("./engine");
-const { FairnessLock } = require("./fairness-lock");
-const { resolveStockfishPath } = require("./stockfish");
-const { getDiagnostics } = require("./diagnostics");
-const { SecureStore } = require("./secure-store");
-const { LichessMonitor } = require("./lichess-monitor");
-const { LichessApi } = require("./lichess-api");
-const { authorizeEngineAnalysis } = require("./engine-authorization");
-const { ExtensionBridge } = require("./ws-server");
-const { autoUpdater } = require("electron-updater");
+const { app, BrowserWindow, ipcMain, Menu, shell, clipboard, dialog } = require('electron')
+const path = require('path')
+const fs = require('fs')
+const { ensureStockfish } = require('./stockfish')
+const { engineSettingsDefaults } = require('./engine')
+const { Overlay } = require('./overlay')
+const { Bridge } = require('./wsserver')
+const { PerformanceCheck } = require('./performance-check')
+const { Diagnostics } = require('./diagnostics')
+const updater = require('./updater')
 
-const gotLock = app.requestSingleInstanceLock();
-if (!gotLock) app.quit();
+// --prod (or CHESSIST_PROD=1) forces production mode when running unpacked from
+// the cloned repo via the local Electron (install.bat) — loads dist/ instead of
+// the Vite dev server.
+const forceProd = process.argv.includes('--prod') || process.env.CHESSIST_PROD === '1'
+const isDev = !app.isPackaged && !forceProd
+let mainWindow = null
+let overlay = null
+let bridge = null
+let stockfishTask = null
+let updateInProgress = false
+let quitting = false
+let shutdownFinished = false
+let performanceCheck = null
+const diagnostics = new Diagnostics()
 
-let mainWindow = null;
-let engine = null;
-let enginePath = null;
-let secureStore = null;
-let lichessMonitor = null;
-let lichessApi = null;
-let extensionBridge = null;
-let quitting = false;
-const pendingOAuthCallbacks = [];
-const fairness = new FairnessLock();
+// ── Settings persistence (userData/chessist-settings.json) ──
+// Game/display settings owned by the app and pushed to the extension over WS.
+const gameSettings = {
+  enabled: true,
+  depth: 18,
+  showBestMove: false,
+  showOpponentBestMove: false,
+  showAltArrows: false,    // default: only the best-move (purple) arrow
+  autoMove: false,
+  instantMove: false,
+  autoMoveDelayMin: 0.1,
+  autoMoveDelayMax: 0.3,
+  renderMode: 'overlay',   // 'overlay' | 'browser' | 'electron'
+  playerColor: 'auto',     // 'auto' | 'white' | 'black'
+  // ── niche / advanced ──
+  showMoveIcon: false,     // move-classification icons on the board
+  smartTiming: true,       // human-like auto-move timing
+  autoRematch: false,
+  autoNewGame: false,
+  stealthMode: true,       // suppress console logs
+  wlBalance: false,        // win/loss balancing
+  maxConsecutiveWins: 2,
+  maxConsecutiveLosses: 3,
+  throwRandom: false,      // randomly throw games
+  lossRandom: false,
+  targetAccuracy: 100,     // target move accuracy %
+}
+
+// App-level preferences (update channel, etc.).
+const appPrefs = { betaUpdates: false, sidebarShortcuts: [], diagnosticsEnabled: false }
+const engineSettings = engineSettingsDefaults()
+
+function normalizeSidebarShortcuts(ids) {
+  if (!Array.isArray(ids)) return []
+  const settings = { game: gameSettings, engine: engineSettings }
+  return [...new Set(ids.filter(id => {
+    if (typeof id !== 'string') return false
+    const [scope, key, extra] = id.split('.')
+    return extra === undefined && Object.hasOwn(settings, scope) && Object.hasOwn(settings[scope], key)
+  }))]
+}
+
+function settingsPath() { return path.join(app.getPath('userData'), 'chessist-settings.json') }
+function loadAll() {
+  try { return JSON.parse(fs.readFileSync(settingsPath(), 'utf8')) || {} } catch { return {} }
+}
+function saveAll({ engine = engineSettings, game = gameSettings } = {}) {
+  const file = settingsPath()
+  const temp = file + '.tmp'
+  try {
+    fs.writeFileSync(temp, JSON.stringify({ engine, game, app: appPrefs }, null, 2))
+    fs.renameSync(temp, file)
+    return true
+  } catch {
+    try { fs.rmSync(temp, { force: true }) } catch {}
+    return false
+  }
+}
+
+const componentStatus = {
+  stockfishOk: false,
+  stockfishState: 'starting',
+  overlayOk: false,
+  extensionConnected: false,   // extension installed (service worker present)
+  extensionUpdateAvailable: false,
+  chessConnected: false,       // a chess tab (content script) is active
+  chessSite: null,             // 'Chess.com' | 'Lichess' when a chess tab is active
+  wsError: null,
+  message: '',
+}
 
 function sendToRenderer(channel, payload) {
-  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading() === false) {
-    mainWindow.webContents.send(channel, payload);
-    return true;
+  if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.send(channel, payload)
   }
-  return false;
 }
-function deliverProtocolUrl(rawUrl) {
-  try {
-    const url = new URL(rawUrl);
-    if (url.protocol !== "chessist:" || url.hostname !== "oauth" || url.pathname !== "/lichess") return;
-    const payload = { provider: "lichess", code: url.searchParams.get("code"), state: url.searchParams.get("state"), error: url.searchParams.get("error") };
-    if (!sendToRenderer("auth:callback", payload)) pendingOAuthCallbacks.push(payload);
-  } catch {}
+
+function pushStatus(patch) {
+  Object.assign(componentStatus, patch)
+  sendToRenderer('status', componentStatus)
 }
-function flushOAuthCallbacks() {
-  while (pendingOAuthCallbacks.length) sendToRenderer("auth:callback", pendingOAuthCallbacks.shift());
-}
-if (gotLock) {
-  app.on("open-url", (event, url) => { event.preventDefault(); deliverProtocolUrl(url); });
-  app.on("second-instance", (_event, argv) => {
-    const callback = argv.find(value => value.startsWith("chessist://"));
-    if (callback) deliverProtocolUrl(callback);
-    if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); }
-  });
+
+function updateStockfishStatus({ status, message }) {
+  diagnostics.record({ event: 'engine_status', state: status })
+  const ready = status === 'ready'
+  pushStatus({ stockfishOk: ready, stockfishState: status, message: ready ? '' : message })
 }
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1440, height: 920, minWidth: 1000, minHeight: 680,
-    show: false, backgroundColor: "#09080d", title: "Chessist Local",
-    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "hidden",
+    width: 1040, height: 720, minWidth: 720, minHeight: 480,
+    title: 'Chessist', backgroundColor: '#000000',
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
+    frame: false, titleBarStyle: 'hidden', autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true, nodeIntegration: false, sandbox: true
-    }
-  });
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false, contextIsolation: true, sandbox: false,
+      backgroundThrottling: false,
+    },
+  })
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173')
+    mainWindow.webContents.openDevTools({ mode: 'detach' })
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'))
+  }
+  mainWindow.webContents.on('did-finish-load', () => pushStatus({}))
+  mainWindow.on('maximize', () => sendToRenderer('window:maximized-change', true))
+  mainWindow.on('unmaximize', () => sendToRenderer('window:maximized-change', false))
+  mainWindow.on('closed', () => { mainWindow = null })
+}
+
+function startSubsystems() {
+  overlay = new Overlay(isDev, process.resourcesPath, (s) => pushStatus(s))
+  // Restore saved settings before first start (engine applied on uciok).
+  const saved = loadAll()
+  for (const key of Object.keys(engineSettings)) {
+    if (Object.hasOwn(saved.engine || {}, key)) engineSettings[key] = saved.engine[key]
+  }
+  Object.assign(gameSettings, saved.game || {})
+  Object.assign(appPrefs, saved.app || {})
+  appPrefs.sidebarShortcuts = normalizeSidebarShortcuts(appPrefs.sidebarShortcuts)
+  diagnostics.setEnabled(appPrefs.diagnosticsEnabled === true)
+  const executable = app.isPackaged ? path.join(process.resourcesPath, 'bun-ws-worker.exe') : undefined
+  bridge = new Bridge(pushStatus, {
+    executable,
+    game: gameSettings,
+    engine: engineSettings,
+    versions: {
+      chromium: readExtensionVersion(extensionDir()),
+      firefox: readExtensionVersion(firefoxDir()),
+    },
+    onPosition: (data) => sendToRenderer('position', data),
+    onEval: (data) => sendToRenderer('eval', data),
+    onAutoMoveStatus: (data) => {
+      if (data) diagnostics.record({ event: 'move_outcome', state: data.state })
+      sendToRenderer('auto-move-status', data)
+    },
+    onOverlay: (data) => overlay.draw(data),
+    onEngineStatus: updateStockfishStatus,
+    onDiagnostic: data => diagnostics.record(data),
+    diagnosticsEnabled: diagnostics.enabled,
+  })
+  bridge.start().catch(() => {}) // The bridge reports startup failures through component status.
+  overlay.start()
+
+  prepareStockfish()
+}
+
+function prepareStockfish(redownload = false) {
+  if (stockfishTask) return stockfishTask
+  stockfishTask = (async () => {
+    const report = (status) => bridge.broadcastStatus(status)
     try {
-      const external = new URL(url);
-      if (external.protocol === "https:" && ["lichess.org", "www.lichess.org", "chess.com", "www.chess.com"].includes(external.hostname)) shell.openExternal(external.toString());
-    } catch {}
-    return { action: "deny" };
-  });
-  mainWindow.webContents.on("will-navigate", (event, url) => {
-    const isDev = process.env.VITE_DEV_SERVER_URL && url.startsWith(process.env.VITE_DEV_SERVER_URL);
-    const isAppFile = url.startsWith("file://") && url.endsWith("/dist/index.html");
-    if (!isDev && !isAppFile) event.preventDefault();
-  });
-  mainWindow.once("ready-to-show", () => mainWindow.show());
-  mainWindow.webContents.on("did-finish-load", flushOAuthCallbacks);
-  mainWindow.on("closed", () => { mainWindow = null; });
-  if (process.env.VITE_DEV_SERVER_URL) mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-  else mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
-}
-function broadcastFairness() { sendToRenderer("fairness:changed", fairness.snapshot()); }
-function updateVerifiedPlatformGameState(state) {
-  const snapshot = fairness.updateGame({
-    platform: String(state.platform || ""), gameId: String(state.gameId || ""),
-    status: String(state.status || ""), userIsParticipant: state.userIsParticipant === true
-  });
-  broadcastFairness();
-  return snapshot;
-}
-function createLichessClients() {
-  lichessApi?.stopAll();
-  lichessMonitor?.stop();
-  lichessApi = new LichessApi({
-    tokenProvider: async () => secureStore?.get("lichess"),
-    onGameEvent: (gameId, event) => sendToRenderer("lichess:game-event", { gameId, event })
-  });
-  lichessMonitor = new LichessMonitor({
-    tokenProvider: async () => secureStore?.get("lichess"),
-    onGameState: updateVerifiedPlatformGameState,
-    onAvailability: (verified, error) => {
-      fairness.setMonitoring("lichess", verified);
-      broadcastFairness();
-      if (error) sendToRenderer("platform:error", { platform: "lichess", message: error.message });
+      const userData = app.getPath('userData')
+      if (redownload) {
+        report({ status: 'downloading', message: 'Stockfish: re-downloading…' })
+        await bridge.killEngine()
+        fs.rmSync(path.join(userData, 'stockfish.exe'), { force: true })
+      }
+      const sfPath = await ensureStockfish(userData, report)
+      if (sfPath && !quitting) bridge.startEngine(sfPath)
+    } catch (e) {
+      if (!quitting) report({ status: 'error', message: `Stockfish setup failed: ${e.message}` })
     }
-  });
-  lichessMonitor.start().catch(error => sendToRenderer("platform:error", { platform: "lichess", message: error.message }));
-}
-function requireTrustedRenderer(event) {
-  if (event.sender !== mainWindow?.webContents || event.senderFrame !== event.sender.mainFrame) {
-    throw new Error("Untrusted renderer IPC request rejected.");
-  }
-  const frameUrl = event.senderFrame?.url || "";
-  if (process.env.VITE_DEV_SERVER_URL && frameUrl.startsWith(process.env.VITE_DEV_SERVER_URL)) return;
-  if (frameUrl.startsWith("file://")) return;
-  throw new Error("Untrusted renderer IPC request rejected.");
+  })().finally(() => { stockfishTask = null })
+  return stockfishTask
 }
 
-ipcMain.handle("updates:get-version", event => { requireTrustedRenderer(event); return app.getVersion(); });
-
-ipcMain.handle("window:minimize", event => { requireTrustedRenderer(event); mainWindow?.minimize(); });
-ipcMain.handle("window:toggle-maximize", event => { requireTrustedRenderer(event); if (mainWindow?.isMaximized()) mainWindow.unmaximize(); else mainWindow?.maximize(); });
-ipcMain.handle("window:close", event => { requireTrustedRenderer(event); mainWindow?.close(); });
-ipcMain.handle("fairness:get-state", event => { requireTrustedRenderer(event); return fairness.snapshot(); });
-ipcMain.handle("engine:authorize", (event, context) => { requireTrustedRenderer(event); return authorizeEngineAnalysis(fairness, context); });
-ipcMain.handle("auth:open-lichess", async (event, value) => {
-  requireTrustedRenderer(event);
-  const parsed = new URL(value);
-  if (parsed.protocol !== "https:" || parsed.hostname !== "lichess.org" || parsed.pathname !== "/oauth") throw new Error("Only the official Lichess OAuth page is allowed.");
-  await shell.openExternal(parsed.toString());
-  return { opened: true };
-});
-ipcMain.handle("auth:exchange-lichess-token", async (event, input) => {
-  requireTrustedRenderer(event);
-  const { code, verifier, clientId, redirectUri } = input || {};
-  if (![code, verifier, clientId].every(value => typeof value === "string" && value.length > 0 && value.length < 4096)) throw new Error("Invalid OAuth exchange parameters.");
-  if (redirectUri !== "chessist://oauth/lichess") throw new Error("Unexpected OAuth redirect URI.");
-  const body = new URLSearchParams({ grant_type: "authorization_code", code, code_verifier: verifier, client_id: clientId, redirect_uri: redirectUri });
-  const response = await fetch("https://lichess.org/api/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" }, body });
-  if (!response.ok) throw new Error("Lichess token exchange failed: HTTP " + response.status);
-  return response.json();
-});
-ipcMain.handle("auth:get-status", event => { requireTrustedRenderer(event); try { return { connected: Boolean(secureStore?.get("lichess")) }; } catch { return { connected: false, secureStorageAvailable: false }; } });
-ipcMain.handle("auth:store-lichess-token", async (event, token) => {
-  requireTrustedRenderer(event);
-  if (typeof token !== "string" || token.length < 20 || token.length > 4096) throw new Error("Invalid Lichess access token.");
-  secureStore.save("lichess", token);
-  createLichessClients();
-  return { connected: true };
-});
-ipcMain.handle("auth:clear-lichess", event => {
-  requireTrustedRenderer(event);
-  lichessApi?.stopAll(); lichessApi = null; lichessMonitor?.stop(); lichessMonitor = null;
-  secureStore.delete("lichess"); fairness.clearPlatform("lichess"); fairness.clearMonitoring("lichess"); broadcastFairness();
-  return { disconnected: true };
-});
-ipcMain.handle("lichess:request", (event, options) => {
-  requireTrustedRenderer(event);
-  if (!lichessApi) throw new Error("Connect Lichess first.");
-  return lichessApi.request(options?.path, options || {});
-});
-ipcMain.handle("lichess:stream-game", (event, gameId) => { requireTrustedRenderer(event); if (!lichessApi) throw new Error("Connect Lichess first."); return lichessApi.streamGame(gameId); });
-ipcMain.handle("lichess:stop-game-stream", (event, gameId) => { requireTrustedRenderer(event); return lichessApi?.stopStream(gameId); });
-ipcMain.handle("chesscom:public-get", async (event, apiPath) => {
-  requireTrustedRenderer(event);
-  if (typeof apiPath !== "string" || !/^\/player\/[a-zA-Z0-9_-]+(?:\/(?:stats|games\/archives|games\/\d{4}\/\d{2}))?$/.test(apiPath)) throw new Error("Chess.com endpoint is not allowed.");
-  const response = await fetch("https://api.chess.com/pub" + apiPath, { headers: { Accept: "application/json", "User-Agent": "ChessistLocal/1.0" } });
-  if (response.status === 429) throw new Error("Chess.com rate limit reached; retry later.");
-  return { ok: response.ok, status: response.status, data: response.ok ? await response.json() : null };
-});
-ipcMain.handle("platform:open-chesscom", async event => {
-  requireTrustedRenderer(event);
-  await shell.openExternal("https://www.chess.com/play/online");
-  return { opened: true };
-});
-ipcMain.handle("engine:choose", async event => {
-  requireTrustedRenderer(event);
-  const result = await dialog.showOpenDialog(mainWindow, { title: "Select a UCI chess engine", properties: ["openFile"] });
-  if (result.canceled || !result.filePaths[0]) return { canceled: true };
-  const selected = result.filePaths[0];
-  if (!fs.statSync(selected).isFile()) throw new Error("Selected engine path is not a file.");
-  engine?.quit(); enginePath = selected;
-  engine = new UciEngine({ binaryPath: enginePath, fairnessLock: fairness });
-  engine.on("info", info => sendToRenderer("engine:info", info));
-  await engine.start();
-  return { ready: true, path: enginePath };
-});
-ipcMain.handle("engine:start", async event => {
-  requireTrustedRenderer(event);
-  if (engine?.ready) return { ready: true, path: enginePath };
-  if (!engine) {
-    enginePath = resolveStockfishPath({ appPath: app.isPackaged ? process.resourcesPath : process.cwd() });
-    engine = new UciEngine({ binaryPath: enginePath, fairnessLock: fairness });
-    engine.on("info", info => sendToRenderer("engine:info", info));
-  }
-  await engine.start();
-  return { ready: true, path: enginePath };
-});
-ipcMain.handle("engine:analyze", async (event, options) => {
-  requireTrustedRenderer(event);
-  fairness.assertCanAnalyze(options?.context);
-  if (!engine) throw new Error("Start a UCI engine before analysis.");
-  await engine.analyze(options);
-  return { accepted: true };
-});
-ipcMain.handle("engine:stop", event => { requireTrustedRenderer(event); engine?.stop(); return { stopped: true }; });
-ipcMain.handle("engine:set-option", (event, { name, value }) => {
-  requireTrustedRenderer(event);
-  if (!engine?.ready) throw new Error("Start a UCI engine before changing its options.");
-  engine.setOption(name, value);
-  return { updated: true };
-});
-ipcMain.handle("diagnostics:get", event => { requireTrustedRenderer(event); return getDiagnostics({ enginePath, engineReady: Boolean(engine?.ready), fairness: fairness.snapshot() }); });
-
-if (gotLock) {
-  app.whenReady().then(() => {
-    secureStore = new SecureStore({ safeStorage, userDataPath: app.getPath("userData") });
-    if (app.isPackaged) {
-      autoUpdater.autoDownload = true;
-      autoUpdater.autoInstallOnAppQuit = true;
-      autoUpdater.on("error", error => sendToRenderer("updates:error", { message: error.message }));
-      autoUpdater.on("update-available", info => sendToRenderer("updates:available", { version: info.version }));
-      autoUpdater.on("update-not-available", info => sendToRenderer("updates:current", { version: info.version }));
-      autoUpdater.on("download-progress", progress => sendToRenderer("updates:progress", { percent: Math.round(progress.percent) }));
-      autoUpdater.on("update-downloaded", async info => {
-        const result = await dialog.showMessageBox(mainWindow, {
-          type: "info",
-          title: "Chessist update ready",
-          message: `Chessist ${info.version} has been downloaded.`,
-          detail: "Restart Chessist to install the update. Your settings and saved games will remain on this device.",
-          buttons: ["Restart now", "Later"],
-          defaultId: 0,
-          cancelId: 1
-        });
-        if (result.response === 0) autoUpdater.quitAndInstall();
-      });
-      setTimeout(() => autoUpdater.checkForUpdates().catch(error => {
-        sendToRenderer("updates:error", { message: error.message });
-      }), 12000);
+function registerIpc() {
+  ipcMain.handle('window:is-maximized', () => mainWindow?.isMaximized() ?? false)
+  ipcMain.on('window:minimize', () => mainWindow?.minimize())
+  ipcMain.on('window:maximize', () => {
+    if (!mainWindow) return
+    if (mainWindow.isMaximized()) mainWindow.unmaximize(); else mainWindow.maximize()
+  })
+  ipcMain.on('window:close', () => mainWindow?.close())
+  ipcMain.handle('status:get', () => componentStatus)
+  ipcMain.handle('engine:get', () => engineSettings)
+  ipcMain.handle('engine:set', (_e, { key, value }) => {
+    if (!Object.hasOwn(engineSettings, key)) throw new Error('Unknown engine setting.')
+    if (!saveAll({ engine: { ...engineSettings, [key]: value } })) throw new Error('Could not save engine settings.')
+    engineSettings[key] = value
+    bridge?.applyEngineSetting(key, value)
+    return engineSettings
+  })
+  ipcMain.handle('game:get', () => gameSettings)
+  ipcMain.handle('game:set', (_e, { key, value }) => {
+    if (!Object.hasOwn(gameSettings, key)) throw new Error('Unknown game setting.')
+    if (!saveAll({ game: { ...gameSettings, [key]: value } })) throw new Error('Could not save game settings.')
+    gameSettings[key] = value
+    bridge?.broadcastSettings(gameSettings)
+    return gameSettings
+  })
+  ipcMain.handle('sidebar:get-shortcuts', () => appPrefs.sidebarShortcuts)
+  ipcMain.handle('sidebar:set-shortcuts', (_e, ids) => {
+    const previous = appPrefs.sidebarShortcuts
+    appPrefs.sidebarShortcuts = normalizeSidebarShortcuts(ids)
+    if (saveAll()) return appPrefs.sidebarShortcuts
+    appPrefs.sidebarShortcuts = previous
+    throw new Error('Could not save shortcuts.')
+  })
+  ipcMain.handle('stockfish:redownload', () => {
+    if (performanceCheck) throw new Error('Wait for the performance check to finish.')
+    return prepareStockfish(true)
+  })
+  ipcMain.handle('diagnostics:get', () => ({ enabled: diagnostics.enabled }))
+  ipcMain.handle('diagnostics:set-enabled', (event, enabled) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents || typeof enabled !== 'boolean') {
+      throw new Error('Could not change diagnostics recording.')
     }
-    if (app.isPackaged) app.setAsDefaultProtocolClient("chessist"); else app.setAsDefaultProtocolClient("chessist", process.execPath, [path.resolve(process.argv[1])]);
-    extensionBridge = new ExtensionBridge({ port: 27301, host: "127.0.0.1", onPage: payload => sendToRenderer("extension:page", payload) });
-    extensionBridge.start();
-    createWindow();
-    try { if (secureStore.get("lichess")) createLichessClients(); } catch (error) { sendToRenderer("platform:error", { platform: "storage", message: error.message }); }
-    const coldStartUrl = process.argv.find(value => value.startsWith("chessist://"));
-    if (coldStartUrl) deliverProtocolUrl(coldStartUrl);
-    app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
-  }).catch(error => { dialog.showErrorBox("Chessist Local failed to start", error.message); app.quit(); });
-  app.on("before-quit", () => {
-    quitting = true; extensionBridge?.stop(); lichessMonitor?.stop(); lichessApi?.stopAll(); engine?.quit();
-  });
-  app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
+    const previous = appPrefs.diagnosticsEnabled
+    appPrefs.diagnosticsEnabled = enabled
+    if (!saveAll()) {
+      appPrefs.diagnosticsEnabled = previous
+      throw new Error('Could not save diagnostics settings.')
+    }
+    diagnostics.setEnabled(enabled)
+    bridge?.setDiagnosticsEnabled(enabled)
+    if (enabled) {
+      diagnostics.record({ event: 'engine_status', state: componentStatus.stockfishState })
+      diagnostics.record({ event: 'engine_settings', threads: engineSettings.threads, hash: engineSettings.hash })
+    }
+    return { enabled: diagnostics.enabled }
+  })
+  ipcMain.handle('diagnostics:export', async event => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('Open Setup to export diagnostics.')
+    const date = new Date().toISOString().slice(0, 10)
+    const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export Chessist diagnostics', defaultPath: `chessist-diagnostics-${date}.json`,
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    })
+    if (canceled || !filePath) return { saved: false }
+    await diagnostics.export(filePath, app.getVersion())
+    return { saved: true }
+  })
+  ipcMain.handle('performance:run', async (event) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('Open Setup to run a performance check.')
+    if (performanceCheck) throw new Error('A performance check is already running.')
+    const check = new PerformanceCheck(mainWindow, bridge)
+    performanceCheck = check
+    try {
+      return await check.run({ skipStockfish: !!stockfishTask || componentStatus.chessConnected })
+    } finally {
+      performanceCheck = null
+    }
+  })
+  ipcMain.on('performance:frame-finished', (event, id, result) => {
+    performanceCheck?.finishFrame(event.sender, id, result)
+  })
+  ipcMain.handle('update:get-beta', () => appPrefs.betaUpdates)
+  ipcMain.handle('update:set-beta', (_e, beta) => { appPrefs.betaUpdates = !!beta; saveAll(); return appPrefs.betaUpdates })
+  ipcMain.handle('update:check', () => updater.checkForUpdate(appPrefs.betaUpdates))
+  ipcMain.handle('update:apply', async (_event, expectedTag) => {
+    if (updateInProgress) return { ok: false, error: 'An update is already in progress.' }
+    updateInProgress = true
+    let result
+    try {
+      result = await updater.applyUpdate(appPrefs.betaUpdates, (line) => sendToRenderer('update:log', line), expectedTag)
+      if (result.installer) setImmediate(() => app.quit())
+      else if (result.ok) setTimeout(() => { app.relaunch(); app.quit() }, 1000)
+      return result
+    } finally {
+      if (!result?.ok) updateInProgress = false
+    }
+  })
+  ipcMain.handle('shell:open', (_e, url) => { try { shell.openExternal(url) } catch {} })
+  ipcMain.handle('extension:path', () => extensionDir())
+  ipcMain.handle('extension:reveal', () => { try { return shell.openPath(extensionDir()) } catch { return '' } })
+  ipcMain.handle('extension:firefox-path', () => firefoxDir())
+  ipcMain.handle('extension:firefox-reveal', () => { try { return shell.openPath(firefoxDir()) } catch { return '' } })
+  ipcMain.handle('clipboard:write', (_e, text) => { try { clipboard.writeText(String(text)) } catch {} })
+  ipcMain.handle('app:toggle-devtools', () => {
+    const wc = mainWindow?.webContents
+    if (!wc || wc.isDestroyed()) return false
+    if (wc.isDevToolsOpened()) { wc.closeDevTools(); return false }
+    wc.openDevTools({ mode: 'detach' }); return true
+  })
 }
+
+// The bundled (or repo) browser-extension folder users load unpacked.
+function extensionDir() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'extension')
+    : path.join(__dirname, '..', 'extension')
+}
+
+// The Firefox-flavored copy (build with `npm run build:firefox`; shipped in prod).
+function firefoxDir() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'firefox')
+    : path.join(__dirname, '..', 'firefox')
+}
+
+function readExtensionVersion(directory) {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(directory, 'manifest.json'), 'utf8')).version
+  } catch {
+    return null
+  }
+}
+
+// Single instance: a second launch must not race for port 27301. If we can't get
+// the lock, focus the existing window and quit this one.
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.show(); mainWindow.focus()
+    }
+  })
+
+  app.whenReady().then(async () => {
+    await updater.clearInstallerCache()
+    Menu.setApplicationMenu(null)
+    registerIpc()
+    createWindow()
+    startSubsystems()
+    app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow() })
+  })
+}
+
+app.on('before-quit', (event) => {
+  if (shutdownFinished) return
+  event.preventDefault()
+  if (quitting) return
+  quitting = true
+  overlay?.kill()
+  Promise.resolve(bridge?.stop()).catch(error => {
+    console.error('Could not stop the local service:', error)
+  }).finally(() => {
+    shutdownFinished = true
+    app.quit()
+  })
+})
+app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
