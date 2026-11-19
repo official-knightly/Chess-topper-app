@@ -82,7 +82,7 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
+      "artifactName": "Chessist Setup ${version}-${arch}.${ext}",
       "extraResources": [
         {
           "from": "overlay/bin/Release/net48/ChessistOverlay.exe",
@@ -119,7 +119,6 @@
         "repo": "Chess-topper-app-",
         "releaseType": "release"
       }
-    ],
-    "artifactName": "Chessist Setup ${version}-${arch}.${ext}"
+    ]
   }
 }
