@@ -128,6 +128,9 @@ describe('Engine evaluation queue', () => {
   it('refreshes a completed evaluation after a settings change and respects an explicit stop', () => {
     const engine = new Engine()
     engine.ready = true
+    // Avoid depending on the CI runner's CPU count (which sets the default threads).
+    engine.settings.threads = 1
+    engine.threads = 1
     const send = vi.spyOn(engine, '_send')
     engine.evaluate(first, 18, 1)
     engine._handle('bestmove a1a2')
