@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import DesktopShell from '../ui-template/src/DesktopShell'
 import { Icon } from '../ui-template/src/icons'
-import logo from './assets/logo.png'
 import SidebarShortcuts from './components/Sidebar'
 import { IconEval, IconSetup } from './components/icons'
 import ChessistSettings from './components/ChessistSettings'
@@ -13,7 +12,7 @@ const piecesKey = (fen) => (fen ? fen.split(' ')[0] : '')
 const brand = {
   name: 'Chessist',
   caption: 'Desktop analysis',
-  mark: <img className="chessist-brand-logo" src={logo} alt="" />,
+  mark: null,
 }
 const navigation = [
   { id: 'evaluation', label: 'Evaluation', icon: <IconEval aria-hidden="true" /> },
