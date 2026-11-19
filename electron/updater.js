@@ -113,12 +113,12 @@ async function clearInstallerCache() {
 
 // ZIP and unpacked builds check GitHub for updates and link to the Releases page.
 //   stable → newest release tag vs installed version
-//   beta   → tip-of-main commit SHA (UI compares to the baked build SHA)
+//   beta   → tip-of-chessist-desktop-app commit SHA (UI compares to the baked build SHA)
 async function checkRemote(beta) {
   const installed = appVersion()
   try {
     if (beta) {
-      const c = await httpJson(`https://api.github.com/repos/${REPO}/commits/main`)
+      const c = await httpJson(`https://api.github.com/repos/${REPO}/commits/chessist-desktop-app`)
       return { channel: 'beta', manual: true, latestSha: String(c.sha || '').slice(0, 7), version: installed }
     }
     let tag, releaseNotes
@@ -172,21 +172,21 @@ async function changelogNotes(tag) {
   }
 }
 
-// beta  → track origin/main (any new commit is an update).
+// beta  → track origin/chessist-desktop-app (any new commit is an update).
 // stable→ track the newest release tag (v*); no tags yet = nothing to update to.
 // Returns { unsupported } | { error } | { channel, available, behind?, tag?, noReleases? }.
 async function checkForUpdate(beta = false) {
   if (installedOnWindows()) return (await checkInstallerUpdate()).status
   if (!isGitRepo()) return checkRemote(beta)
   if ((await run('git', ['rev-parse', 'HEAD'])).code !== 0) return { error: 'Not a git checkout.' }
-  const fetch = await run('git', ['fetch', '--quiet', '--tags', 'origin', 'main'])
+  const fetch = await run('git', ['fetch', '--quiet', '--tags', 'origin', 'chessist-desktop-app'])
   if (fetch.code !== 0) return { error: 'Could not reach GitHub: ' + fetch.out.trim() }
   const head = (await run('git', ['rev-parse', 'HEAD'])).out.trim()
   const headShort = (await run('git', ['rev-parse', '--short', 'HEAD'])).out.trim() || head.slice(0, 7)
 
   if (beta) {
-    const remote = (await run('git', ['rev-parse', 'origin/main'])).out.trim()
-    const behind = parseInt(((await run('git', ['rev-list', '--count', 'HEAD..origin/main'])).out || '').trim() || '0', 10)
+    const remote = (await run('git', ['rev-parse', 'origin/chessist-desktop-app'])).out.trim()
+    const behind = parseInt(((await run('git', ['rev-list', '--count', 'HEAD..origin/chessist-desktop-app'])).out || '').trim() || '0', 10)
     return { channel: 'beta', available: !!remote && remote !== head, behind, head: headShort }
   }
 
@@ -203,13 +203,13 @@ async function applyUpdate(beta, onLog, expectedTag) {
   if (!isGitRepo()) return { ok: false, error: 'Open the release to download the update.' }
 
   onLog?.('\n$ git fetch --tags origin main\n')
-  let r = await run('git', ['fetch', '--tags', 'origin', 'main'], onLog)
+  let r = await run('git', ['fetch', '--tags', 'origin', 'chessist-desktop-app'], onLog)
   if (r.code !== 0) return { ok: false, step: 'git fetch', code: r.code }
 
-  // beta stays on the main branch; stable detaches at the release tag.
+  // beta stays on the chessist-desktop-app branch; stable detaches at the release tag.
   let checkout
   if (beta) {
-    checkout = ['checkout', '-B', 'main', 'origin/main']
+    checkout = ['checkout', '-B', 'chessist-desktop-app', 'origin/chessist-desktop-app']
   } else {
     const tag = await latestTag()
     if (expectedTag && expectedTag !== tag) return { ok: false, error: UPDATE_VERSION_CHANGED }
