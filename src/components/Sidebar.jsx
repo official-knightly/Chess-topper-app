@@ -1,2 +1,47 @@
-import React from "react";
-export default function Sidebar({items,active,onNavigate,collapsed,setCollapsed,engineStatus}){return <aside className={"sidebar"+(collapsed?" collapsed":"")}><div className="side-brand"><div><div className="brand-name">CHESSIST</div><div className="brand-sub">LOCAL PRO</div></div></div><nav className="side-nav">{items.map(x=><button key={x[0]} title={collapsed?x[1]:undefined} onClick={()=>onNavigate(x[0])} className={"nav-item"+(active===x[0]?" active":"")}><span className="nav-icon">{x[2]}</span><span className="nav-label">{x[1]}</span></button>)}</nav><div className="sidebar-bottom"><button className={"nav-item"+(active==="settings"?" active":"")} onClick={()=>onNavigate("settings")}><span className="nav-icon">⚙</span><span className="nav-label">Settings</span></button><button className={"nav-item"+(active==="about"?" active":"")} onClick={()=>onNavigate("about")}><span className="nav-icon">ⓘ</span><span className="nav-label">About</span></button><div className="engine-indicator"><span className="green-dot"/><span className="engine-label">Engine {engineStatus}</span></div><button className="collapse-btn" onClick={()=>setCollapsed(!collapsed)}>{collapsed?"»":"«  Collapse sidebar"}</button></div></aside>}
+import { useRef, useState } from 'react'
+import SettingInput from './controls/SettingInput'
+import ShortcutPicker from './ShortcutPicker'
+import { SETTING_SHORTCUTS, formatSettingValue } from '../data/settingControls'
+
+const SHORTCUTS_BY_ID = new Map(SETTING_SHORTCUTS.map(setting => [setting.id, setting]))
+
+export default function SidebarShortcuts({ settings, shortcutIds, shortcutError, onSettingChange, onShortcutsChange }) {
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const addButton = useRef(null)
+  return (
+    <>
+      <button ref={addButton} type="button" className="sidebar-add-shortcut" aria-haspopup="dialog"
+        disabled={!shortcutIds} onClick={() => setPickerOpen(true)}>
+        <span aria-hidden="true">+</span> Add shortcuts
+      </button>
+      <section className="sidebar-shortcuts" aria-label="Setting shortcuts">
+        {shortcutIds?.map(id => {
+          const setting = SHORTCUTS_BY_ID.get(id)
+          if (!setting || !settings[setting.scope]) return null
+          const values = settings[setting.scope]
+          const isToggle = setting.type === 'toggle'
+          return (
+            <div key={id} className="sidebar-shortcut">
+              <div className="sidebar-shortcut-header">
+                <span className="sidebar-shortcut-label">{setting.label}</span>
+                {setting.type === 'range' && <span className="sidebar-shortcut-value">{formatSettingValue(setting, values[setting.key])}</span>}
+                {isToggle && <SettingInput setting={setting} values={values} compact
+                  onChange={value => onSettingChange(setting.scope, setting.key, value)} />}
+                <button type="button" className="shortcut-remove" aria-label={`Remove ${setting.label} shortcut`}
+                  title={`Remove ${setting.label} shortcut`} onClick={() => {
+                    onShortcutsChange(shortcutIds.filter(shortcutId => shortcutId !== id))
+                    addButton.current?.focus()
+                  }}>×</button>
+              </div>
+              {!isToggle && <SettingInput setting={setting} values={values} compact
+                onChange={value => onSettingChange(setting.scope, setting.key, value)} />}
+            </div>
+          )
+        })}
+        {shortcutError && !pickerOpen && <p className="shortcut-error" role="status">{shortcutError}</p>}
+      </section>
+      {pickerOpen && <ShortcutPicker selectedIds={shortcutIds} error={shortcutError} onChange={onShortcutsChange}
+        onClose={() => setPickerOpen(false)} />}
+    </>
+  )
+}
