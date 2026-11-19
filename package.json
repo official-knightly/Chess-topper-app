@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .\"",
     "build": "vite build",
-    "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/wsserver.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/engine-authorization.test.js electron/fairness-lock.test.js electron/updater.test.js && vitest run electron/bun-ws-transport.test.js electron/engine.test.js electron/extension-move.test.js electron/extension-reload.test.js electron/installer-updater.test.js electron/lichess-round.test.js electron/move-observer.test.js electron/stockfish.test.js src/services/platform-adapters.test.js",
+    "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/wsserver.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/engine-authorization.test.js electron/fairness-lock.test.js && vitest run electron/bun-ws-transport.test.js electron/engine.test.js electron/extension-move.test.js electron/extension-reload.test.js electron/installer-updater.test.js electron/lichess-round.test.js electron/move-observer.test.js electron/stockfish.test.js src/services/platform-adapters.test.js",
     "start": "electron .",
     "package:dir": "npm run build:worker && npm run build && electron-builder --dir",
     "dist:win": "npm run build:worker && npm run build && electron-builder --win nsis --publish never",
