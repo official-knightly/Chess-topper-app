@@ -46,7 +46,7 @@ jobs:
             release/Chessist-Local-*.dmg
             release/Chessist-Local-*.AppImage
             release/Chessist-Local-*.deb
-            release/*.yml
+            release/latest*.yml
             release/*.blockmap
           if-no-files-found: error
           retention-days: 14
@@ -72,12 +72,12 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             release-assets/chessist-desktop-win/Chessist Setup *.exe
-            release-assets/chessist-desktop-win/*.yml
+            release-assets/chessist-desktop-win/latest*.yml
             release-assets/chessist-desktop-win/*.blockmap
             release-assets/chessist-desktop-mac/*.dmg
-            release-assets/chessist-desktop-mac/*.yml
+            release-assets/chessist-desktop-mac/latest*.yml
             release-assets/chessist-desktop-mac/*.blockmap
             release-assets/chessist-desktop-linux/*.AppImage
             release-assets/chessist-desktop-linux/*.deb
-            release-assets/chessist-desktop-linux/*.yml
+            release-assets/chessist-desktop-linux/latest*.yml
             release-assets/chessist-desktop-linux/*.blockmap
