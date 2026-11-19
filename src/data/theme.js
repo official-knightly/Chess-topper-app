@@ -1,1 +1,4 @@
-export const defaultTheme={name:"Midnight Violet",background:"#09080d",panel:"#111018",accent:"#9564cf",text:"#f4f0fa"};
+export function applyTheme(accent = 'violet') {
+  document.documentElement.dataset.theme = 'dark'
+  document.documentElement.dataset.accent = accent
+}
