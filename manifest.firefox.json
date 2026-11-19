@@ -1,27 +1,59 @@
 {
   "manifest_version": 3,
-  "name": "Chessist Companion",
-  "version": "1.0.0",
-  "description": "Reports supported chess-site tab presence to the local Chessist desktop app.",
-  "permissions": ["tabs"],
-  "host_permissions": [
-    "https://lichess.org/*",
-    "https://www.lichess.org/*",
-    "https://chess.com/*",
-    "https://www.chess.com/*",
-    "http://127.0.0.1:27301/*"
+  "name": "Chessist",
+  "version": "3.0.4",
+  "description": "Live chess evaluation bar for Chess.com and Lichess - powered by Stockfish. Created by imluri.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chessist@imluri.dev",
+      "strict_min_version": "128.0"
+    }
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "alarms"
   ],
-  "background": { "scripts": ["src/background/service-worker.js"] },
-  "content_scripts": [{
-    "matches": [
-      "https://lichess.org/*",
-      "https://www.lichess.org/*",
-      "https://chess.com/*",
-      "https://www.chess.com/*"
-    ],
-    "js": ["src/content/content.js"],
-    "run_at": "document_idle"
-  }],
-  "action": { "default_popup": "src/popup/popup.html" },
-  "browser_specific_settings": { "gecko": { "id": "companion@chessist.local", "strict_min_version": "128.0" } }
+  "host_permissions": [
+    "https://www.chess.com/*",
+    "https://lichess.org/*",
+    "ws://127.0.0.1/*"
+  ],
+  "background": {
+    "scripts": ["src/background/service-worker.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.chess.com/*"],
+      "js": ["src/content/move-observer.js", "src/content/content.js"],
+      "css": ["src/content/content.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://lichess.org/*"],
+      "js": ["src/content/move-observer.js", "src/content/lichess.js"],
+      "css": ["src/content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
