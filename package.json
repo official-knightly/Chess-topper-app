@@ -15,11 +15,12 @@
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/engine-authorization.test.js electron/fairness-lock.test.js electron/updater.test.js && vitest run electron/bun-ws-transport.test.js electron/engine.test.js electron/extension-move.test.js electron/extension-reload.test.js electron/installer-updater.test.js electron/lichess-round.test.js electron/move-observer.test.js electron/stockfish.test.js src/services/platform-adapters.test.js",
     "start": "electron .",
     "package:dir": "npm run build && electron-builder --dir",
-    "dist:win": "npm run build && electron-builder --win nsis --publish never",
-    "dist:mac": "npm run build && electron-builder --mac dmg --publish never",
-    "dist:linux": "npm run build && electron-builder --linux AppImage deb --publish never",
+    "dist:win": "npm run build:worker && npm run build && electron-builder --win nsis --publish never",
+    "dist:mac": "npm run build:worker && npm run build && electron-builder --mac dmg --publish never",
+    "dist:linux": "npm run build:worker && npm run build && electron-builder --linux AppImage deb --publish never",
     "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
-    "package:extensions": "node scripts/package-extensions.mjs"
+    "package:extensions": "node scripts/package-extensions.mjs",
+    "build:worker": "bun scripts/build-ws-worker.mjs"
   },
   "dependencies": {
     "@fontsource/instrument-sans": "5.2.8",
@@ -27,8 +28,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "ws": "8.18.3",
-    "electron-updater": "^6.6.2",
-    "bun": "1.4.4"
+    "electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "concurrently": "9.2.1",
@@ -42,7 +42,7 @@
   },
   "build": {
     "appId": "ai.chessist.local",
-    "productName": "Chessist Local",
+    "productName": "Chessist",
     "asar": true,
     "directories": {
       "output": "release"
@@ -51,8 +51,7 @@
       "dist/**/*",
       "electron/**/*",
       "package.json",
-      "node_modules/ws/**/*",
-      "node_modules/bun/**/*"
+      "node_modules/ws/**/*"
     ],
     "extraResources": [
       {
@@ -63,12 +62,8 @@
         ]
       },
       {
-        "from": "node_modules/bun/bin",
-        "to": "bun",
-        "filter": [
-          "bun",
-          "bun.exe"
-        ]
+        "from": "release/bun-ws-worker.exe",
+        "to": "bun-ws-worker.exe"
       }
     ],
     "protocols": [
@@ -104,7 +99,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "artifactName": "Chessist Setup ${version}-${arch}.${ext}"
     },
     "publish": [
       {
@@ -113,6 +109,7 @@
         "repo": "Chess-topper-app-",
         "releaseType": "release"
       }
-    ]
+    ],
+    "artifactName": "Chessist Setup ${version}-${arch}.${ext}"
   }
 }

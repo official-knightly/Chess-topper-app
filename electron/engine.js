@@ -94,7 +94,15 @@ class Engine {
       hash: Number.isSafeInteger(this.hashMb) ? this.hashMb : null,
     })
     if (!this._restarts) this.onStatus?.({ status: 'starting', message: 'Stockfish: starting…' })
-    const proc = spawn(this._path, [], { windowsHide: true })
+    let proc
+    try {
+      proc = spawn(this._path, [], { windowsHide: true })
+    } catch (error) {
+      const message = `Stockfish could not start: ${error.code || error.message}`
+      this._diagnostic('engine_start_failed', { reason: 'Stockfish could not start' })
+      this.onStatus?.({ status: 'error', message })
+      return
+    }
     this.proc = proc
     let startupError
     let stderr = ''

@@ -5,18 +5,23 @@ const root = resolve(import.meta.dir, '..')
 const release = join(root, 'release')
 const output = join(release, 'bun-ws-worker.exe')
 mkdirSync(release, { recursive: true })
-// Bun creates a .bun-cache beside the current directory for its target binary.
-process.chdir(release)
 
-// The Windows installer targets x64. Use Bun's baseline build for older CPUs.
-await Bun.build({
+const platform = process.platform === 'win32' ? 'windows' : process.platform
+const target = platform === 'windows' && process.arch === 'x64'
+  ? 'bun-windows-x64-baseline'
+  : `bun-${platform}-${process.arch}`
+
+const result = await Bun.build({
   entrypoints: [join(root, 'electron', 'bun-ws-worker.cjs')],
   compile: {
-    target: 'bun-windows-x64-baseline',
+    target,
     outfile: output,
     autoloadDotenv: false,
     autoloadBunfig: false,
   },
 })
-
-console.log(`Built Chessist WebSocket worker: ${output}`)
+if (!result.success) {
+  for (const log of result.logs) console.error(log)
+  throw new Error('Failed to compile the Chessist local worker.')
+}
+console.log(`Built Chessist local worker for ${target}: ${output}`)

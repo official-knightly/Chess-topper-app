@@ -1,5 +1,6 @@
 const { spawn } = require('node:child_process')
 const { join } = require('node:path')
+const fs = require('node:fs')
 const { createInterface } = require('node:readline')
 
 const PORT = 27301
@@ -48,11 +49,15 @@ class Bridge {
   }
 
   _launch() {
-    const bun = join(__dirname, '..', 'node_modules', 'bun', 'bin', process.platform === 'win32' ? 'bun.exe' : 'bun')
-    const args = this.executable ? [String(this.port)] : [join(__dirname, 'bun-ws-worker.cjs'), String(this.port)]
+    const packagedWorker = process.resourcesPath
+      ? join(process.resourcesPath, 'bun-ws-worker.exe')
+      : ''
+    const bundledWorker = this.executable || (packagedWorker && fs.existsSync(packagedWorker) ? packagedWorker : null)
+    const command = bundledWorker || 'bun'
+    const args = bundledWorker ? [String(this.port)] : [join(__dirname, 'bun-ws-worker.cjs'), String(this.port)]
     const env = { ...process.env }
     delete env.BUN_BE_BUN
-    const child = spawn(this.executable || bun, args, { env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] })
+    const child = spawn(command, args, { env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] })
     let resolveReady, rejectReady, resolveClosed
     const ready = new Promise((resolve, reject) => { resolveReady = resolve; rejectReady = reject })
     const closed = new Promise(resolve => { resolveClosed = resolve })
