@@ -1,55 +1,74 @@
-"use strict";
-const { contextBridge, ipcRenderer } = require("electron");
-const listen = (channel, callback) => {
-  if (typeof callback !== "function") throw new TypeError("Listener must be a function");
-  const listener = (_event, value) => callback(value);
-  ipcRenderer.on(channel, listener);
-  return () => ipcRenderer.removeListener(channel, listener);
-};
-contextBridge.exposeInMainWorld("chessist", {
-  os: process.platform,
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('chessist', {
   isDesktop: true,
-  window: {
-    minimize: () => ipcRenderer.invoke("window:minimize"),
-    toggleMaximize: () => ipcRenderer.invoke("window:toggle-maximize"),
-    close: () => ipcRenderer.invoke("window:close")
+  platform: process.platform,
+  getStatus: () => ipcRenderer.invoke('status:get'),
+  getEngineSettings: () => ipcRenderer.invoke('engine:get'),
+  setEngineOption: (key, value) => ipcRenderer.invoke('engine:set', { key, value }),
+  getGameSettings: () => ipcRenderer.invoke('game:get'),
+  setGameOption: (key, value) => ipcRenderer.invoke('game:set', { key, value }),
+  getSidebarShortcuts: () => ipcRenderer.invoke('sidebar:get-shortcuts'),
+  setSidebarShortcuts: (ids) => ipcRenderer.invoke('sidebar:set-shortcuts', ids),
+  redownloadStockfish: () => ipcRenderer.invoke('stockfish:redownload'),
+  getDiagnosticsStatus: () => ipcRenderer.invoke('diagnostics:get'),
+  setDiagnosticsEnabled: enabled => ipcRenderer.invoke('diagnostics:set-enabled', enabled),
+  exportDiagnostics: () => ipcRenderer.invoke('diagnostics:export'),
+  runPerformanceCheck: () => ipcRenderer.invoke('performance:run'),
+  onPerformancePhase: (cb) => {
+    const listener = (_event, phase) => cb(phase)
+    ipcRenderer.on('performance:phase', listener)
+    return () => ipcRenderer.removeListener('performance:phase', listener)
   },
-  engine: {
-    start: () => ipcRenderer.invoke("engine:start"),
-    choose: () => ipcRenderer.invoke("engine:choose"),
-    analyze: options => ipcRenderer.invoke("engine:analyze", options),
-    authorize: context => ipcRenderer.invoke("engine:authorize", context),
-    stop: () => ipcRenderer.invoke("engine:stop"),
-    setOption: (name, value) => ipcRenderer.invoke("engine:set-option", { name, value }),
-    onInfo: callback => listen("engine:info", callback)
+  onPerformanceFrame: (cb) => {
+    const listener = (_event, frame) => cb(frame)
+    ipcRenderer.on('performance:frame', listener)
+    return () => ipcRenderer.removeListener('performance:frame', listener)
   },
-  fairness: { getState: () => ipcRenderer.invoke("fairness:get-state"), onChange: callback => listen("fairness:changed", callback) },
-  extension: { onPage: callback => listen("extension:page", callback) },
-  platform: {
-    chesscomGet: apiPath => ipcRenderer.invoke("chesscom:public-get", apiPath),
-    openChessCom: () => ipcRenderer.invoke("platform:open-chesscom")
+  finishPerformanceFrame: (id, result) => ipcRenderer.send('performance:frame-finished', id, result),
+  openExternal: (url) => ipcRenderer.invoke('shell:open', url),
+  getExtensionPath: () => ipcRenderer.invoke('extension:path'),
+  revealExtensionFolder: () => ipcRenderer.invoke('extension:reveal'),
+  getFirefoxPath: () => ipcRenderer.invoke('extension:firefox-path'),
+  revealFirefoxFolder: () => ipcRenderer.invoke('extension:firefox-reveal'),
+  copyText: (text) => ipcRenderer.invoke('clipboard:write', text),
+  checkUpdate: () => ipcRenderer.invoke('update:check'),
+  applyUpdate: (expectedTag) => ipcRenderer.invoke('update:apply', expectedTag),
+  getBeta: () => ipcRenderer.invoke('update:get-beta'),
+  setBeta: (beta) => ipcRenderer.invoke('update:set-beta', beta),
+  onUpdateLog: (cb) => {
+    const h = (_e, line) => cb(line)
+    ipcRenderer.on('update:log', h)
+    return () => ipcRenderer.removeListener('update:log', h)
   },
-  lichess: {
-    request: options => ipcRenderer.invoke("lichess:request", options),
-    streamGame: gameId => ipcRenderer.invoke("lichess:stream-game", gameId),
-    stopGameStream: gameId => ipcRenderer.invoke("lichess:stop-game-stream", gameId),
-    onGameEvent: callback => listen("lichess:game-event", callback)
+  minimizeWindow: () => ipcRenderer.send('window:minimize'),
+  maximizeWindow: () => ipcRenderer.send('window:maximize'),
+  closeWindow: () => ipcRenderer.send('window:close'),
+  isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
+  onWindowMaximizedChange: (cb) => {
+    const listener = (_event, maximized) => cb(maximized)
+    ipcRenderer.on('window:maximized-change', listener)
+    return () => ipcRenderer.removeListener('window:maximized-change', listener)
   },
-  auth: {
-    openLichess: url => ipcRenderer.invoke("auth:open-lichess", url),
-    exchangeLichessToken: input => ipcRenderer.invoke("auth:exchange-lichess-token", input),
-    storeLichessToken: token => ipcRenderer.invoke("auth:store-lichess-token", token),
-    clearLichess: () => ipcRenderer.invoke("auth:clear-lichess"),
-    getStatus: () => ipcRenderer.invoke("auth:get-status"),
-    onCallback: callback => listen("auth:callback", callback),
-    onError: callback => listen("platform:error", callback)
+  toggleDevTools: () => ipcRenderer.invoke('app:toggle-devtools'),
+  onStatus: (cb) => {
+    const h = (_e, payload) => cb(payload)
+    ipcRenderer.on('status', h)
+    return () => ipcRenderer.removeListener('status', h)
   },
-  updates: {
-    getVersion: () => ipcRenderer.invoke("updates:get-version"),
-    onAvailable: callback => listen("updates:available", callback),
-    onCurrent: callback => listen("updates:current", callback),
-    onProgress: callback => listen("updates:progress", callback),
-    onError: callback => listen("updates:error", callback)
+  onEval: (cb) => {
+    const h = (_e, payload) => cb(payload)
+    ipcRenderer.on('eval', h)
+    return () => ipcRenderer.removeListener('eval', h)
   },
-  diagnostics: () => ipcRenderer.invoke("diagnostics:get")
-});
+  onPosition: (cb) => {
+    const h = (_e, payload) => cb(payload)
+    ipcRenderer.on('position', h)
+    return () => ipcRenderer.removeListener('position', h)
+  },
+  onAutoMoveStatus: (cb) => {
+    const h = (_e, payload) => cb(payload)
+    ipcRenderer.on('auto-move-status', h)
+    return () => ipcRenderer.removeListener('auto-move-status', h)
+  },
+})
