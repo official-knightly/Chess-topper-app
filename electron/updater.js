@@ -84,7 +84,7 @@ async function applyInstallerUpdate(onLog, expectedTag) {
   if (status.error) return { ok: false, error: status.error }
   if (expectedTag && expectedTag !== status.tag) return { ok: false, error: UPDATE_VERSION_CHANGED }
   if (!status.available) return { ok: false, error: 'There is no newer release available.' }
-  if (!asset) return { ok: false, error: 'The release does not have a compatible installer that Chessist can verify.' }
+  if (!asset) return { ok: false, error: 'The release does not have a compatible installer that Chess Topper can verify.' }
 
   const { app } = require('electron')
   const file = installerPath(app.getPath('userData'))

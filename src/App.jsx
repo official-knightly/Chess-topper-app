@@ -50,7 +50,7 @@ export default function App() {
     const load = (scope, read) => read().then(values => {
       if (mounted) setSettings(previous => ({ ...previous, [scope]: values }))
     }).catch(() => {
-      if (mounted) setSettingsLoadError('Could not load some settings. Restart Chessist to try again.')
+      if (mounted) setSettingsLoadError('Could not load some settings. Restart Chess Topper to try again.')
     })
     load('game', api.getGameSettings)
     load('engine', api.getEngineSettings)

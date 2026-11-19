@@ -252,7 +252,7 @@ function registerIpc() {
     if (!mainWindow || event.sender !== mainWindow.webContents) throw new Error('Open Setup to export diagnostics.')
     const date = new Date().toISOString().slice(0, 10)
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-      title: 'Export Chess Topper diagnostics', defaultPath: `chessist-diagnostics-${date}.json`,
+      title: 'Export Chess Topper diagnostics', defaultPath: `chess-topper-diagnostics-${date}.json`,
       filters: [{ name: 'JSON', extensions: ['json'] }],
     })
     if (canceled || !filePath) return { saved: false }
