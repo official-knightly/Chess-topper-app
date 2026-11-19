@@ -131,6 +131,13 @@ describe('Engine evaluation queue', () => {
     const send = vi.spyOn(engine, '_send')
     engine.evaluate(first, 18, 1)
     engine._handle('bestmove a1a2')
+    // This unit test simulates an already-ready UCI engine without a child process.
+    // Reassert the idle-ready state explicitly so platform scheduling cannot leak
+    // into the option-refresh assertion.
+    engine.ready = true
+    engine._searching = false
+    engine._stopping = false
+    engine._lastRequest = { fen: first, depth: 18, multipv: 1 }
     send.mockClear()
 
     engine.applySetting('threads', 2)
