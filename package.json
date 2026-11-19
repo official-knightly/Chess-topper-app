@@ -20,7 +20,8 @@
     "dist:linux": "npm run build:worker && npm run build && electron-builder --linux AppImage deb --publish never",
     "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
     "package:extensions": "node scripts/package-extensions.mjs",
-    "build:worker": "bun scripts/build-ws-worker.mjs"
+    "build:worker": "bun scripts/build-ws-worker.mjs",
+    "build:overlay": "powershell -ExecutionPolicy Bypass -File scripts/build-overlay.ps1"
   },
   "dependencies": {
     "@fontsource/instrument-sans": "5.2.8",
@@ -53,7 +54,8 @@
       "dist/**/*",
       "electron/**/*",
       "package.json",
-      "node_modules/ws/**/*"
+      "node_modules/ws/**/*",
+      "node_modules/extract-zip/**/*"
     ],
     "extraResources": [
       {
@@ -80,7 +82,13 @@
       "target": [
         "nsis"
       ],
-      "artifactName": "Chessist-Local-${version}-${arch}.${ext}"
+      "artifactName": "Chessist-Local-${version}-${arch}.${ext}",
+      "extraResources": [
+        {
+          "from": "overlay/bin/Release/net48/ChessistOverlay.exe",
+          "to": "overlay/ChessistOverlay.exe"
+        }
+      ]
     },
     "mac": {
       "target": [

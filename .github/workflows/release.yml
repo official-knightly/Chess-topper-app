@@ -32,6 +32,9 @@ jobs:
         with:
           bun-version: 1.4.4
       - run: npm install
+      - name: Build Windows overlay helper
+        if: runner.os == 'Windows'
+        run: npm run build:overlay
       - run: npm test
       - run: npm run dist:${{ matrix.target }}
       - name: Upload desktop installers
