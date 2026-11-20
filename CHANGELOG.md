@@ -2,12 +2,15 @@
 
 ## [1.0.4] — 2026-11-20
 
-### Chess Topper desktop release
-- Refresh the Chess Topper product branding across the desktop app and release presentation.
-- Keep the Windows, macOS and Linux installer builds aligned under one version.
-- Fix release publishing so internal worker binaries and ZIP bundles are not published as user downloads.
-- Keep only the platform installers and the updater metadata required by in-app updates.
-- Preserve the existing Lichess connection, game monitoring and move-handling code while the desktop Lichess play experience is being completed.
+### Chess Topper
+- Updated the desktop product name and release presentation to Chess Topper.
+- Aligned the Windows, macOS and Linux installers on the same release version.
+- Cleaned up release publishing: end users get platform installers, not internal worker executables or ZIP bundles.
+- Retained the updater metadata required by the desktop app's in-app update flow.
+- Improved the release notes and project documentation, including the supported Chess.com, Lichess and World Chess integration boundaries.
+
+**Lichess note:** live-board analysis and move assistance still use the browser extension on a Lichess game tab. This release does not claim a standalone in-app Lichess online-play board.
+
 
 ## [3.0.4] — 2026-11-14
 
