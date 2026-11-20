@@ -71,7 +71,21 @@ jobs:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.4' }}
           target_commitish: chessist-desktop-app
           name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.4' }}
-          generate_release_notes: true
+          generate_release_notes: false
+          body: |
+            ## Chess Topper v1.0.4
+
+            A refreshed desktop release for Windows, macOS and Linux.
+
+            ### What's included
+            - Consistent Chess Topper branding across the desktop app and release downloads.
+            - Native Stockfish analysis, live board evaluation and configurable move assistance.
+            - Existing Chess.com and Lichess browser-extension integration.
+            - World Chess public-profile link support.
+            - Cleaner release downloads: platform installers only, with updater metadata retained for in-app updates.
+
+            ### Lichess
+            Live-board analysis and move assistance still require a Lichess game tab in a supported browser with the Chess Topper extension loaded. This release does not include a standalone embedded Lichess online-play board.
           fail_on_unmatched_files: true
           files: |
             release-assets/chess-topper-desktop-win/*.exe
