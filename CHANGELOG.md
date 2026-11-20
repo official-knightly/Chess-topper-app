@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.4] — 2026-11-20
+
+### Chess Topper desktop release
+- Refresh the Chess Topper product branding across the desktop app and release presentation.
+- Keep the Windows, macOS and Linux installer builds aligned under one version.
+- Fix release publishing so internal worker binaries and ZIP bundles are not published as user downloads.
+- Keep only the platform installers and the updater metadata required by in-app updates.
+- Preserve the existing Lichess connection, game monitoring and move-handling code while the desktop Lichess play experience is being completed.
+
 ## [3.0.4] — 2026-11-14
 
 - Fix a Lichess Instant move race where the mouse could release before the board registered the drag. Chessist waits for the piece to reach the destination and reports an input error if the drag does not settle.
