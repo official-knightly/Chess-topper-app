@@ -68,16 +68,14 @@ jobs:
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.3' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.4' }}
           target_commitish: chessist-desktop-app
-          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.3' }}
+          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.4' }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
             release-assets/chess-topper-desktop-win/*.exe
-            !release-assets/chess-topper-desktop-win/bun-ws-worker.exe
-            !release-assets/chess-topper-desktop-win/*.zip
-            release-assets/chess-topper-desktop-win/latest*.yml
+                                    release-assets/chess-topper-desktop-win/latest*.yml
             release-assets/chess-topper-desktop-win/*.blockmap
             release-assets/chess-topper-desktop-mac/*.dmg
             release-assets/chess-topper-desktop-mac/latest*.yml
@@ -86,5 +84,4 @@ jobs:
             release-assets/chess-topper-desktop-linux/*.deb
             release-assets/chess-topper-desktop-linux/latest*.yml
             release-assets/chess-topper-desktop-linux/*.blockmap
-            !release-assets/chess-topper-desktop-mac/*.zip
-            !release-assets/chess-topper-desktop-linux/*.zip
+                        
