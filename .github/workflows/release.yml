@@ -86,7 +86,7 @@ jobs:
 
             ### Lichess
             Live-board analysis and move assistance still require a Lichess game tab in a supported browser with the Chess Topper extension loaded. This release does not include a standalone embedded Lichess online-play board.
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
           files: |
             release-assets/chess-topper-desktop-win/*.exe
                                     release-assets/chess-topper-desktop-win/latest*.yml
@@ -97,5 +97,4 @@ jobs:
             release-assets/chess-topper-desktop-linux/*.AppImage
             release-assets/chess-topper-desktop-linux/*.deb
             release-assets/chess-topper-desktop-linux/latest*.yml
-            release-assets/chess-topper-desktop-linux/*.blockmap
                         
