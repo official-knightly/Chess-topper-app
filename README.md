@@ -1,5 +1,5 @@
-<p align="center"><img src="extension/icons/icon128.png" width="96" height="96" alt="Chessist"></p>
-<h1 align="center">Chessist</h1>
+<p align="center"><img src="extension/icons/icon128.png" width="96" height="96" alt="Chess Topper"></p>
+<h1 align="center">Chess Topper</h1>
 <p align="center">Live Stockfish evaluation for Chess.com and Lichess — a desktop app + browser extension.</p>
 <img width="1609" height="939" alt="chessist" src="https://github.com/user-attachments/assets/754eead5-5897-4954-81ce-8d2334497c43" />
 
@@ -9,9 +9,9 @@
 
 Two parts working together:
 
-- **Chessist desktop app** (Electron + React) — runs native Stockfish, owns all settings, shows live
+- **Chess Topper desktop app** (Electron + React) — runs native Stockfish, owns all settings, shows live
   evaluation, and (optionally) draws a transparent, screen-capture-invisible overlay on the board.
-- **Chessist browser extension** — reads the board on chess.com / lichess.org, sends positions to the
+- **Chess Topper browser extension** — reads the board on chess.com / lichess.org, sends positions to the
   app, draws in-page arrows, and plays auto-moves.
 
 Windows 10/11. The transparent overlay is Windows-only.
@@ -31,7 +31,7 @@ Windows 10/11. The transparent overlay is Windows-only.
 
 ## Install
 
-> Prebuilt installers will land on the [Releases](https://github.com/imluri/Chessist/releases) page.
+> Prebuilt installers will land on the [Releases](https://github.com/imluri/Chess Topper/releases) page.
 > Until then, install from source — one click builds **and** installs it.
 
 **Requirements:** [Node 20+](https://nodejs.org/) and the
@@ -39,13 +39,13 @@ Windows 10/11. The transparent overlay is Windows-only.
 
 1. Get the code — clone it (recommended; enables in-app auto-update):
    ```bash
-   git clone https://github.com/imluri/Chessist.git
+   git clone https://github.com/imluri/Chess Topper.git
    ```
    …or download the ZIP from the repo / a release and extract it.
 2. Double-click **`install.bat`**. It requests administrator rights (one UAC prompt — needed to build
    the installer), checks Node/.NET, installs dependencies and the overlay, then builds the Windows
-   installer (`npm run dist`) and runs it. **Chessist installs and launches automatically.**
-   - If the installer build can't run on your machine, it falls back to a portable **Chessist**
+   installer (`npm run dist`) and runs it. **Chess Topper installs and launches automatically.**
+   - If the installer build can't run on your machine, it falls back to a portable **Chess Topper**
      shortcut in the project folder — launch from there and keep the folder where it is.
 3. First launch downloads Stockfish — watch the **Setup** tab.
 4. On the **Setup** tab, follow the **Browser extension** card: it reveals the bundled extension
@@ -55,7 +55,7 @@ Windows 10/11. The transparent overlay is Windows-only.
    render mode and tweak settings via the **gear** (Settings → Game / Engine).
 
 **Updating:** open **About → Updates**. Windows installer builds with in-app updates can download
-the next stable release and restart Chessist from **Update & restart**. Older installer builds
+the next stable release and restart Chess Topper from **Update & restart**. Older installer builds
 need one manual upgrade to get this feature. Git clones can update in place from release tags
 or from `main` with the beta channel. Source ZIP builds link to the release page.
 If your browser loaded the bundled extension folder, the extension reloads itself when a newer
@@ -94,7 +94,7 @@ installer and overlay. The service sends UI and overlay events over its process 
 ## Project structure
 
 ```
-Chessist/
+Chess Topper/
 ├── electron/      # Electron main, Bun WebSocket worker, Stockfish, overlay driver, IPC
 ├── src/           # React renderer (sidebar, Evaluation, Settings modal, board, controls)
 ├── overlay/       # C# overlay helper — transparent, capture-invisible window (stdin-driven)
