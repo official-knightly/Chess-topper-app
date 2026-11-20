@@ -1,6 +1,6 @@
 {
   "name": "chess-topper-desktop",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "Chess Topper native desktop chess application",
   "main": "electron/main.js",
