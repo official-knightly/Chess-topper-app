@@ -1,3 +1,4 @@
+import wordmark from '../assets/chess-topper-wordmark.png'
 import { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import Check from '../components/controls/Check'
@@ -193,6 +194,7 @@ function Updates({ status, onChange }) {
 export default function AboutPage({ updateStatus, onUpdateStatus }) {
   return (
     <div className="page-content" style={{ lineHeight: 1.65 }}>
+      <img src={wordmark} alt="Chess Topper" style={{ display: 'block', width: 'min(240px, 100%)', height: 'auto', margin: '0 8px 14px' }} />
       <header className="page-heading">
         <h1>About</h1>
         <p>Chess Topper v{VERSION}</p>
