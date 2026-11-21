@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.5] — 2026-11-21
+
+### Chess Topper branding and World Chess
+- Renamed the desktop application data folder and settings file to Chess Topper, migrating existing user data so the existing Stockfish installation and settings remain intact.
+- Added the Chess Topper app logo to the desktop shell and build assets.
+- Added a dedicated World Chess live-board adapter using the existing extension engine bridge, move overlay, arrows and settings pipeline.
+- Added World Chess board input handling in the extension background without changing Chess.com or Lichess handlers.
+- Updated the release workflow to build from the repository's `main` branch.
+
+
 ## [1.0.4] — 2026-11-20
 
 ### Chess Topper
