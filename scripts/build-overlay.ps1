@@ -2,4 +2,4 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 dotnet build (Join-Path $root 'overlay/ChessTopperOverlay.csproj') -c Release
-Write-Host "Overlay built: overlay/bin/Release/net48/ChessistOverlay.exe"
+Write-Host "Overlay built: overlay/bin/Release/net48/ChessTopperOverlay.exe"
