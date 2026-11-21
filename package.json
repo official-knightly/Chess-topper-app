@@ -46,7 +46,7 @@
   "build": {
     "appId": "com.officialknightly.chesstopper",
     "productName": "Chess Topper",
-    "icon": "build/chess-topper-icon.svg",
+    "icon": "build/chess-topper-icon.png",
     "asar": true,
     "directories": {
       "output": "release"
@@ -99,14 +99,14 @@
           "to": "overlay/ChessTopperOverlay.exe"
         }
       ],
-      "icon": "build/chess-topper-icon.svg"
+      "icon": "build/chess-topper-icon.png"
     },
     "mac": {
       "target": [
         "dmg"
       ],
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
-      "icon": "build/chess-topper-icon.svg"
+      "icon": "build/chess-topper-icon.png"
     },
     "linux": {
       "target": [
@@ -116,7 +116,7 @@
       "category": "Game",
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
       "maintainer": "Official Knightly <noreply@github.com>",
-      "icon": "build/chess-topper-icon.svg"
+      "icon": "build/chess-topper-icon.png"
     },
     "nsis": {
       "oneClick": false,
