@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.7] — 2026-11-21
+
+### Release build fixes
+- Build the local WebSocket worker outside the release output directory to avoid Windows file-lock collisions during packaging.
+- Use the checked-in knight PNG icon for Windows, macOS and Linux packaging, allowing electron-builder to generate each platform icon format reliably.
+- Keep the existing Stockfish installation and engine configuration unchanged.
+
+
 ## [1.0.6] — 2026-11-21
 
 ### Packaging, branding and extension delivery

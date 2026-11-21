@@ -80,19 +80,20 @@ jobs:
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.6' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.7' }}
           target_commitish: main
-          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.6' }}
+          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.7' }}
           generate_release_notes: false
           body: |
             ![Chess Topper](https://raw.githubusercontent.com/official-knightly/Chess-topper-app-/main/src/assets/chess-topper-wordmark.png)
 
-            ## Chess Topper v1.0.6
+            ## Chess Topper v1.0.7
 
             A refreshed desktop release for Windows, macOS and Linux.
 
             ### What's included
             - Consistent Chess Topper branding across the desktop app and release downloads.
+            - Fixed Windows worker packaging and macOS icon conversion for platform installers.
             - Existing native Stockfish analysis, live board evaluation and configurable move assistance.
             - Chrome/Chromium and Firefox extension folders are bundled into each installer and verified before upload.
             - Existing Chess.com and Lichess browser-extension integration, plus the current World Chess live-board adapter.

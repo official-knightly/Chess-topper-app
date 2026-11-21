@@ -1,6 +1,6 @@
 {
   "name": "chess-topper-desktop",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "description": "Chess Topper native desktop chess application",
   "main": "electron/main.js",
@@ -59,7 +59,7 @@
     ],
     "extraResources": [
       {
-        "from": "release/bun-ws-worker.exe",
+        "from": "build/worker/bun-ws-worker.exe",
         "to": "bun-ws-worker.exe"
       },
       {
@@ -95,7 +95,7 @@
       "artifactName": "Chess-Topper-${version}-${arch}.${ext}",
       "extraResources": [
         {
-          "from": "release/bun-ws-worker.exe",
+          "from": "build/worker/bun-ws-worker.exe",
           "to": "bun-ws-worker.exe"
         },
         {
@@ -119,14 +119,14 @@
           "to": "overlay/ChessTopperOverlay.exe"
         }
       ],
-      "icon": "build/chess-topper-icon.svg"
+      "icon": "build/chess-topper-icon.png"
     },
     "mac": {
       "target": [
         "dmg"
       ],
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
-      "icon": "build/chess-topper-icon.svg"
+      "icon": "build/chess-topper-icon.png"
     },
     "linux": {
       "target": [
@@ -136,7 +136,7 @@
       "category": "Game",
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
       "maintainer": "Official Knightly <noreply@github.com>",
-      "icon": "build/chess-topper-icon.svg"
+      "icon": "build/chess-topper-icon.png"
     },
     "nsis": {
       "oneClick": false,
