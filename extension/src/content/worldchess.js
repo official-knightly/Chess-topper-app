@@ -339,8 +339,8 @@
       'cg-wrap', '.cg-wrap',
       '[data-testid="chessboard"]', '[data-testid="chess-board"]',
       '[data-testid*="board"]', '[data-game-board]',
-      'wc-chess-board', 'chess-board',
-      '.chess-board', '.chessboard', '[class*="chess-board"]'
+      'wc-chess-board', 'world-chess-board', 'wc-board', 'chess-board',
+      '.chess-board', '.chessboard', '.board-container', '[class*="board-container"]', '[class*="chess-board"]'
     ];
     for (const selector of selectors) {
       const board = document.querySelector(selector);
@@ -848,6 +848,9 @@
   function isInOwnGame(board = findBoard()) {
     if (!board || !getGameId()) return false;
     const scope = roundForBoard(board) || document;
+    const playerColor = board.getAttribute('data-player-color') || board.dataset?.playerColor ||
+      scope.querySelector('[data-player-color]')?.getAttribute('data-player-color');
+    if (['white', 'black', 'w', 'b'].includes(playerColor)) return true;
     if (scope.querySelector(
       '[data-testid*="resign"], [data-testid*="draw"], [aria-label*="resign" i], ' +
       '[aria-label*="draw" i], [aria-label*="give up" i], button[title*="resign" i], ' +
