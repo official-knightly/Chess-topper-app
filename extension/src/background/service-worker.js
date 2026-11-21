@@ -307,7 +307,7 @@ async function domBoardMove(tabId, fromSquare, toSquare, mode, promotion, instan
       const files = 'abcdefgh'
       const wrap = document.querySelector('cg-wrap') || document.querySelector('.cg-wrap')
       const chessCom = document.querySelector('wc-chess-board') || document.querySelector('chess-board')
-      const worldChess = document.querySelector('[data-testid="chessboard"], [data-testid="chess-board"], [data-testid*="board"], [data-game-board], .chess-board, .chessboard, [class*="chess-board"]')
+      const worldChess = document.querySelector('[data-testid="chessboard"], [data-testid="chess-board"], [data-testid*="board"], [data-game-board], .chess-board, .chessboard, .board-container, [class*="board-container"], [class*="chess-board"], world-chess-board, wc-board')
       const board = wrap
         ? (wrap.querySelector('cg-board') || wrap)
         : chessCom
@@ -430,7 +430,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const files = 'abcdefgh'
       const wrap = document.querySelector('cg-wrap') || document.querySelector('.cg-wrap')
       const chessCom = document.querySelector('wc-chess-board') || document.querySelector('chess-board')
-      const worldChess = document.querySelector('[data-testid="chessboard"], [data-testid="chess-board"], [data-testid*="board"], [data-game-board], .chess-board, .chessboard, [class*="chess-board"]')
+      const worldChess = document.querySelector('[data-testid="chessboard"], [data-testid="chess-board"], [data-testid*="board"], [data-game-board], .chess-board, .chessboard, .board-container, [class*="board-container"], [class*="chess-board"], world-chess-board, wc-board')
       const board = wrap
         ? (wrap.querySelector('cg-board') || wrap)
         : chessCom
