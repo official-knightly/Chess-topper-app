@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Chess Topper",
-  "version": "3.0.5",
-  "description": "Chess Topper companion for Chess.com, Lichess, and World Chess public profiles.",
+  "version": "3.0.6",
+  "description": "Chess Topper companion for Chess.com, Lichess, and World Chess live games.",
   "permissions": [
     "storage",
     "tabs",
