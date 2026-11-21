@@ -1,7 +1,7 @@
 <h1 align="center">Chess Topper</h1>
-<p align="center">A native desktop chess analysis companion for Chess.com and Lichess, with public World Chess profile support.</p>
+<p align="center">A native desktop chess analysis companion for Chess.com and Lichess, with live World Chess game support.</p>
 
-## Chess Topper v1.0.4
+## Chess Topper v1.0.5
 
 Chess Topper brings engine analysis, board evaluation, and move assistance into a focused desktop app. The companion browser extension reads supported live chess boards and connects them to the desktop engine.
 
@@ -12,7 +12,7 @@ Chess Topper brings engine analysis, board evaluation, and move assistance into 
 - Configurable move assistance and timing controls.
 - Lichess account connection, game monitoring and challenge/seek API support.
 - Chess.com and Lichess live-board integration through the browser extension.
-- World Chess public-profile link support.
+- World Chess live-game board analysis and move assistance.
 - In-app update checking for supported Windows installer builds.
 
 **Lichess gameplay note:** live-board analysis and move assistance require opening the Lichess game in a supported browser and loading the Chess Topper extension. The desktop app does not currently provide a standalone embedded Lichess online-play board.
