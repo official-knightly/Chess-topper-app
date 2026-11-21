@@ -23,7 +23,7 @@ function installerAsset(release, arch) {
 }
 
 function installerPath(userData) {
-  return path.join(userData, 'chessist-update.exe')
+  return path.join(userData, 'chess-topper-update.exe')
 }
 
 async function clearInstallerFiles(file) {
