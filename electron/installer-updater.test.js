@@ -65,12 +65,12 @@ describe('update preview', () => {
   it('uses the matching section of the target tag changelog in a source checkout', async () => {
     const updater = mockUpdater({ git: {
       'rev-parse HEAD': 'installed',
-      'fetch --quiet --tags origin chessist-desktop-app': '',
+      'fetch --quiet --tags origin main': '',
       'rev-parse --short HEAD': 'install',
       'tag --list v* --sort=-v:refname': 'v2.1.0\nv2.0.9',
       'rev-list -n 1 v2.1.0': 'target',
       'show v2.1.0:CHANGELOG.md': '# Changelog\n\n## [2.2.0]\n- Unrelated\n\n## [2.1.0] — 2026-11-12\n\n### Fixed\n- Target change\n\n## [2.0.9]\n- Old change',
-      'fetch --tags origin chessist-desktop-app': '',
+      'fetch --tags origin main': '',
     } })
 
     await expect(updater.checkForUpdate()).resolves.toMatchObject({
