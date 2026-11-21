@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Chess Topper",
   "version": "3.0.6",
-  "description": "Chess Topper companion for Chess.com, Lichess, and World Chess live games.",
+  "description": "Chess Topper companion for Chess.com, Lichess, and World Chess live-game analysis and move assistance.",
   "permissions": [
     "storage",
     "tabs",
@@ -53,6 +53,7 @@
         "https://www.worldchess.com/*"
       ],
       "js": [
+        "src/content/move-observer.js",
         "src/content/worldchess.js"
       ],
       "run_at": "document_idle"
