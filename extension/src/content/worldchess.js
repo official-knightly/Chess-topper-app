@@ -353,7 +353,7 @@
 
   // Returns cg-board (the actual surface with pieces)
   function getBoardSurface(board) {
-    return board.querySelector('cg-board') || board.querySelector('[data-board-surface]') || board.querySelector('.board-surface') || board;
+    return board.querySelector('cg-board') || board.querySelector('[data-board-surface]') || board.querySelector('.board-surface') || board.querySelector('.board') || board;
   }
 
   function hasActivePremove(surface) {
@@ -410,8 +410,8 @@
   function parsePiecesFromDOM(board) {
     const cgBoard = getBoardSurface(board);
     // Transforms can describe an in-between position during drag or animation.
-    if (cgBoard.querySelector('piece.dragging, piece.anim, piece.fading')) return null;
-    const pieces = cgBoard.querySelectorAll('piece');
+    if (cgBoard.querySelector('piece.dragging, piece.anim, piece.fading, .piece.dragging, .piece.anim, .piece.fading')) return null;
+    const pieces = cgBoard.querySelectorAll('piece, .piece, [data-piece][data-square], [data-piece-type][data-square]');
     if (!pieces.length) return null;
 
     const boardRect = board.getBoundingClientRect();
@@ -434,17 +434,35 @@
 
     pieces.forEach(piece => {
       const cls = [...piece.classList];
-      const colorStr = cls.includes('white') ? 'white' : cls.includes('black') ? 'black' : null;
+      const dataSquare = piece.getAttribute('data-square') || piece.dataset?.square;
+      const dataPiece = piece.getAttribute('data-piece') || piece.getAttribute('data-piece-type') || '';
+      const dataColor = piece.getAttribute('data-color') || piece.dataset?.color || '';
+      const combined = (dataPiece + ' ' + cls.join(' ')).toLowerCase();
+      const colorStr = dataColor === 'white' || dataColor === 'w' || combined.includes('white') || /^w(?:king|queen|rook|bishop|knight|pawn|[kqrbnp])$/i.test(dataPiece)
+        ? 'white'
+        : dataColor === 'black' || dataColor === 'b' || combined.includes('black') || /^b(?:king|queen|rook|bishop|knight|pawn|[kqrbnp])$/i.test(dataPiece)
+          ? 'black' : null;
       if (!colorStr) return;
 
       let fenChar = null;
-      for (const [name, chars] of Object.entries(worldChessPieceMap)) {
-        if (cls.includes(name)) { fenChar = chars[colorStr]; break; }
+      const typeMatch = combined.match(/king|queen|rook|bishop|knight|pawn|[kqrbnp]/i);
+      if (typeMatch) {
+        const type = typeMatch[0].toLowerCase();
+        const typeName = ({k:'king',q:'queen',r:'rook',b:'bishop',n:'knight',p:'pawn'})[type] || type;
+        fenChar = worldChessPieceMap[typeName]?.[colorStr] || null;
       }
       if (!fenChar) return;
 
-      // Chessground uses transform: translate(Xpx, Ypx)
-      const transform = piece.style.transform;
+      // Some World Chess builds expose algebraic squares directly.
+      if (dataSquare && /^[a-h][1-8]$/.test(dataSquare)) {
+        const file = 'abcdefgh'.indexOf(dataSquare[0]);
+        const row = 8 - Number(dataSquare[1]);
+        boardArray[row][file] = fenChar;
+        return;
+      }
+
+      // Chessground-style boards use transform: translate(Xpx, Ypx).
+      const transform = piece.style.transform || getComputedStyle(piece).transform;
       const match = transform.match(/translate\((\d+(?:\.\d+)?)px,\s*(\d+(?:\.\d+)?)px\)/);
       if (!match) return;
 
