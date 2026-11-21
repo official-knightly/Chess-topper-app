@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
-    <AssemblyName>ChessistOverlay</AssemblyName>
+    <AssemblyName>ChessTopperOverlay</AssemblyName>
     <RootNamespace>ChessistEngine</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
