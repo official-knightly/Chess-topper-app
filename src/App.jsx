@@ -7,12 +7,13 @@ import ChessistSettings from './components/ChessistSettings'
 import EvaluationPage from './pages/EvaluationPage'
 import SetupPage from './pages/SetupPage'
 import AboutPage from './pages/AboutPage'
+import logo from './assets/logo.png'
 
 const piecesKey = (fen) => (fen ? fen.split(' ')[0] : '')
 const brand = {
   name: 'Chess Topper',
   caption: 'Desktop analysis',
-  mark: null,
+  mark: <img src={logo} alt="" width={24} height={24} style={{ display: 'block', objectFit: 'contain' }} />,
 }
 const navigation = [
   { id: 'evaluation', label: 'Evaluation', icon: <IconEval aria-hidden="true" /> },
