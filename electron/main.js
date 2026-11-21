@@ -25,9 +25,16 @@ app.setName('Chess Topper')
 app.setAppUserModelId('com.officialknightly.chesstopper')
 const chessTopperUserDataPath = path.join(appDataRoot, 'Chess Topper')
 try {
+  const primaryLegacyPath = legacyUserDataPaths.find(legacyPath =>
+    path.resolve(legacyPath) !== path.resolve(chessTopperUserDataPath) && fs.existsSync(legacyPath)
+  )
+  if (!fs.existsSync(chessTopperUserDataPath) && primaryLegacyPath) {
+    fs.renameSync(primaryLegacyPath, chessTopperUserDataPath)
+  }
   fs.mkdirSync(chessTopperUserDataPath, { recursive: true })
   for (const legacyPath of legacyUserDataPaths) {
-    if (path.resolve(legacyPath) !== path.resolve(chessTopperUserDataPath) && fs.existsSync(legacyPath)) {
+    if (path.resolve(legacyPath) !== path.resolve(chessTopperUserDataPath) &&
+        legacyPath !== primaryLegacyPath && fs.existsSync(legacyPath)) {
       fs.cpSync(legacyPath, chessTopperUserDataPath, { recursive: true, force: false, errorOnExist: false })
     }
   }
@@ -86,7 +93,9 @@ function loadAll() {
     const legacy = path.join(app.getPath('userData'), 'chessist-settings.json')
     if (fs.existsSync(legacy)) {
       const saved = JSON.parse(fs.readFileSync(legacy, 'utf8')) || {}
-      try { fs.writeFileSync(current, JSON.stringify(saved, null, 2)) } catch {}
+      try { fs.renameSync(legacy, current) } catch {
+        try { fs.writeFileSync(current, JSON.stringify(saved, null, 2)) } catch {}
+      }
       return saved
     }
     return {}
