@@ -6,7 +6,7 @@ const engineStatus = {
   starting: ['waiting', 'Stockfish is starting', 'The Chess Topper app is connected. Analysis will start when Stockfish is ready.'],
   retrying: ['waiting', 'Stockfish is restarting', 'Check the Setup tab in Chess Topper for details.'],
   downloading: ['waiting', 'Downloading Stockfish', 'Check the Setup tab in Chess Topper for download progress.'],
-  ready: ['ok', 'Stockfish is ready', 'Open supported Chess.com or Lichess boards for analysis. World Chess profile links are supported.'],
+  ready: ['ok', 'Stockfish is ready', 'Open supported Chess.com, Lichess or World Chess live games for analysis.'],
   error: ['off', 'Stockfish is unavailable', 'Open the Setup tab in Chess Topper to see the error and retry.'],
 }
 const appOffline = ['off', 'Can’t reach the Chess Topper app', 'Open the Chess Topper desktop app and check again.']
