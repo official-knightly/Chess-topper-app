@@ -1,6 +1,6 @@
 {
   "name": "chess-topper-desktop",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "Chess Topper native desktop chess application",
   "main": "electron/main.js",
@@ -44,8 +44,9 @@
     "@vitejs/plugin-react": "^4.3.4"
   },
   "build": {
-    "appId": "ai.chessist.local",
+    "appId": "com.officialknightly.chesstopper",
     "productName": "Chess Topper",
+    "icon": "build/chess-topper-icon.png",
     "asar": true,
     "directories": {
       "output": "release"
@@ -72,8 +73,9 @@
     ],
     "protocols": [
       {
-        "name": "Chessist OAuth",
+        "name": "Chess Topper OAuth",
         "schemes": [
+          "chesstopper",
           "chessist"
         ]
       }
@@ -85,8 +87,8 @@
       "artifactName": "Chess-Topper-${version}-${arch}.${ext}",
       "extraResources": [
         {
-          "from": "overlay/bin/Release/net48/ChessistOverlay.exe",
-          "to": "overlay/ChessistOverlay.exe"
+          "from": "overlay/bin/Release/net48/ChessTopperOverlay.exe",
+          "to": "overlay/ChessTopperOverlay.exe"
         }
       ]
     },
