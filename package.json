@@ -129,7 +129,7 @@
           "to": "app-icon.png"
         }
       ],
-      "icon": "build/chess-topper-icon.png"
+      "icon": "build/chess-topper-icon.ico"
     },
     "mac": {
       "target": [
