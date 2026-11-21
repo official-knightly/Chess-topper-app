@@ -85,6 +85,8 @@ jobs:
           name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.5' }}
           generate_release_notes: false
           body: |
+            ![Chess Topper](https://raw.githubusercontent.com/official-knightly/Chess-topper-app-/main/src/assets/chess-topper-wordmark.png)
+
             ## Chess Topper v1.0.5
 
             A refreshed desktop release for Windows, macOS and Linux.
