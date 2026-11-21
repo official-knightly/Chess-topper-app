@@ -330,7 +330,7 @@
   }
 
   // ============================================================
-  // LICHESS-SPECIFIC BOARD FUNCTIONS
+  // WORLD CHESS BOARD FUNCTIONS
   // ============================================================
 
   // Returns the cg-wrap element (has orientation-black/white class and board dimensions)
@@ -367,7 +367,7 @@
     return !!(board?.classList.contains('orientation-black') || board?.classList.contains('flipped') || board?.getAttribute('data-orientation') === 'black' || board?.getAttribute('data-player-color') === 'black');
   }
 
-  // Extract FEN from lichess board (DOM-based, reliable for live + analysis)
+  // Extract FEN from World Chess game state or the visible board.
   function extractFEN(board, liveFen = null) {
     const placement = liveFen?.split(' ')[0];
     const matchesBoard = fen => typeof fen === 'string' && fen.split('/').length >= 7 &&
@@ -517,13 +517,13 @@
     return null;
   }
 
-  // Detect puzzle mode (lichess training)
+  // Detect World Chess puzzle mode.
   function isPuzzleMode() {
     const path = window.location.pathname;
     return /puzzle|training/i.test(path) || !!document.querySelector('[data-testid*="puzzle"]');
   }
 
-  // Detect player's color from cg-wrap orientation class
+  // Detect the player's color from World Chess game metadata.
   function detectPlayerColor(board = findBoard()) {
     if (manualPlayerColor === 'w') return 'w';
     if (manualPlayerColor === 'b') return 'b';
@@ -914,7 +914,7 @@
     if (evalBar) return;
     if (overlayMode || suppressInPage) return;
 
-    log('Chessist: Creating eval bar for lichess');
+    log('Chess Topper: Creating World Chess evaluation bar');
 
     const boardRect = board.getBoundingClientRect();
     const boardHeight = boardRect.height || 400;
