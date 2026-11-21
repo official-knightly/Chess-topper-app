@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.9] — 2026-11-21
+
+### Release workflow correction
+- Correct the release-notes YAML indentation so the desktop build and publishing jobs are actually scheduled.
+- Retain SVG-to-PNG knight icon generation and strict extension-folder checks from v1.0.8.
+
+
 ## [1.0.8] — 2026-11-21
 
 ### Installer and app icon repair
