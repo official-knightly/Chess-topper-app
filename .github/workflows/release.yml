@@ -101,7 +101,7 @@ jobs:
           fail_on_unmatched_files: false
           files: |
             release-assets/chess-topper-desktop-win/*.exe
-                                    release-assets/chess-topper-desktop-win/latest*.yml
+            release-assets/chess-topper-desktop-win/latest*.yml
             release-assets/chess-topper-desktop-win/*.blockmap
             release-assets/chess-topper-desktop-mac/*.dmg
             release-assets/chess-topper-desktop-mac/latest*.yml
