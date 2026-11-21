@@ -360,7 +360,7 @@ function ExtensionModule({ status }) {
                 <button style={btn} onClick={() => copy('about:debugging#/runtime/this-firefox', 'ffurl')}>{copied === 'ffurl' ? 'Copied ✓' : 'Copy about:debugging'}</button>
               </div>
               <p style={{ marginTop: 10, fontSize: 11, color: 'rgb(var(--fg-dim))' }}>
-                Firefox removes temporary add-ons when it restarts — re-add it after restarting. If the folder is empty, run <code>npm run build:firefox</code> (dev only).
+                Firefox removes temporary add-ons when it restarts — re-add it after restarting. The installed app bundles the complete extension folder. If it is missing, reinstall the latest Chess Topper release.
               </p>
             </>
           )}

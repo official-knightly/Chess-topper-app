@@ -1,6 +1,6 @@
 {
   "name": "chess-topper-desktop",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "description": "Chess Topper native desktop chess application",
   "main": "electron/main.js",
@@ -15,9 +15,9 @@
     "test": "node --check extension/src/content/worldchess.js && node --check extension/src/background/service-worker.js && node --check extension/src/content/move-observer.js && node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/wsserver.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/engine-authorization.test.js electron/fairness-lock.test.js && vitest run electron/bun-ws-transport.test.js electron/engine.test.js electron/extension-move.test.js electron/extension-reload.test.js electron/installer-updater.test.js electron/lichess-round.test.js electron/move-observer.test.js electron/stockfish.test.js src/services/platform-adapters.test.js",
     "start": "electron .",
     "package:dir": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --dir",
-    "dist:win": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --win nsis --publish never",
-    "dist:mac": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --mac dmg --publish never",
-    "dist:linux": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --linux AppImage deb --publish never",
+    "dist:win": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --win nsis --publish never && node scripts/verify-package.mjs win",
+    "dist:mac": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --mac dmg --publish never && node scripts/verify-package.mjs mac",
+    "dist:linux": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --linux AppImage deb --publish never && node scripts/verify-package.mjs linux",
     "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
     "package:extensions": "node scripts/package-extensions.mjs",
     "build:worker": "bun scripts/build-ws-worker.mjs",
@@ -46,7 +46,6 @@
   "build": {
     "appId": "com.officialknightly.chesstopper",
     "productName": "Chess Topper",
-    "icon": "build/chess-topper-icon.png",
     "asar": true,
     "directories": {
       "output": "release"
@@ -60,23 +59,24 @@
     ],
     "extraResources": [
       {
-        "from": "engines",
-        "to": "engines",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
         "from": "release/bun-ws-worker.exe",
         "to": "bun-ws-worker.exe"
       },
       {
         "from": "extension",
-        "to": "extension"
+        "to": "extension",
+        "filter": [
+          "**/*",
+          "!**/.DS_Store"
+        ]
       },
       {
         "from": "firefox",
-        "to": "firefox"
+        "to": "firefox",
+        "filter": [
+          "**/*",
+          "!**/.DS_Store"
+        ]
       }
     ],
     "protocols": [
@@ -95,18 +95,38 @@
       "artifactName": "Chess-Topper-${version}-${arch}.${ext}",
       "extraResources": [
         {
+          "from": "release/bun-ws-worker.exe",
+          "to": "bun-ws-worker.exe"
+        },
+        {
+          "from": "extension",
+          "to": "extension",
+          "filter": [
+            "**/*",
+            "!**/.DS_Store"
+          ]
+        },
+        {
+          "from": "firefox",
+          "to": "firefox",
+          "filter": [
+            "**/*",
+            "!**/.DS_Store"
+          ]
+        },
+        {
           "from": "overlay/bin/Release/net48/ChessTopperOverlay.exe",
           "to": "overlay/ChessTopperOverlay.exe"
         }
       ],
-      "icon": "build/chess-topper-icon.png"
+      "icon": "build/chess-topper.ico"
     },
     "mac": {
       "target": [
         "dmg"
       ],
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
-      "icon": "build/chess-topper-icon.png"
+      "icon": "build/chess-topper.icns"
     },
     "linux": {
       "target": [
@@ -116,7 +136,7 @@
       "category": "Game",
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
       "maintainer": "Official Knightly <noreply@github.com>",
-      "icon": "build/chess-topper-icon.png"
+      "icon": "src/assets/logo.png"
     },
     "nsis": {
       "oneClick": false,

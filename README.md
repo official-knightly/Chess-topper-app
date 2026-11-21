@@ -1,9 +1,10 @@
+<p align="center"><img src="src/assets/chess-topper-wordmark.png" alt="Chess Topper" width="520"></p>
 <h1 align="center">Chess Topper</h1>
 <p align="center">A native desktop chess analysis companion for Chess.com and Lichess, with live World Chess game support.</p>
 
-## Chess Topper v1.0.5
+## Chess Topper v1.0.6
 
-Chess Topper brings engine analysis, board evaluation, and move assistance into a focused desktop app. The companion browser extension reads supported live chess boards and connects them to the desktop engine.
+Chess Topper brings engine analysis, board evaluation, and move assistance into a focused desktop app. The companion browser extension reads supported live chess boards and connects them to the desktop engine. The installed desktop app includes complete, non-empty Chrome/Chromium and Firefox extension folders.
 
 ### Highlights
 - World Chess live-game board analysis and move assistance through the browser extension, using the same desktop overlay and engine connection.
@@ -26,7 +27,7 @@ Get the current Windows, macOS or Linux installer from the [Chess Topper Release
 - macOS: `.dmg` installer
 - Linux: `.AppImage` or `.deb`
 
-The release page contains platform installers and the update metadata required by the in-app updater. Internal worker binaries and ZIP bundles are not user downloads.
+The release page contains platform installers and the update metadata required by the in-app updater. Internal worker binaries and debug files are not user downloads. Both browser-extension folders are bundled inside the installed app and can be opened from Setup.
 
 ## Setup
 

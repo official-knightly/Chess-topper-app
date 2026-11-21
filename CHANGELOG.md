@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.6] — 2026-11-21
+
+### Packaging, branding and extension delivery
+- Use the Chess Topper knight mark consistently in the desktop title bar and navigation sidebar.
+- Include the full Chromium and Firefox extension directories in the installed app, and verify their manifests, content scripts, styles and icons before a platform build can be published.
+- Remove the stale missing `engines/` resource reference and use platform-appropriate application icons so release packaging does not fail on a damaged PNG.
+- Keep the existing Stockfish setup and engine integration unchanged; no additional engine is bundled by this update.
+- Keep release downloads focused on platform installers and the updater metadata required by the app.
+
+
 ## [1.0.5] — 2026-11-21
 
 ### Chess Topper branding and World Chess

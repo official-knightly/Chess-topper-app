@@ -7,7 +7,7 @@ import ChessistSettings from './components/ChessistSettings'
 import EvaluationPage from './pages/EvaluationPage'
 import SetupPage from './pages/SetupPage'
 import AboutPage from './pages/AboutPage'
-import logo from './assets/logo.png'
+import logo from './assets/chess-topper-knight.svg'
 
 const piecesKey = (fen) => (fen ? fen.split(' ')[0] : '')
 const brand = {

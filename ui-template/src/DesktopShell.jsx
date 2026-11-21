@@ -36,9 +36,13 @@ export function TitleBar({ brand, windowControls, onToggleNavigation, navigation
   )
 }
 
-export function Sidebar({ items, page, onNavigate, tools, footer, expanded }) {
+export function Sidebar({ brand, items, page, onNavigate, tools, footer, expanded }) {
   return (
     <aside className={`sidebar${expanded ? ' sidebar--expanded' : ''}`} id="app-navigation">
+      <div className="sidebar-brand" style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 14px 18px", minHeight: 64 }}>
+        <span aria-hidden="true" style={{ display: "inline-flex", width: 30, height: 30, flex: "0 0 30px" }}>{brand.mark}</span>
+        <strong style={{ fontSize: 14, letterSpacing: "-0.02em", color: "rgb(var(--fg))" }}>{brand.name}</strong>
+      </div>
       <nav aria-label="Main navigation">
         {items.map(({ id, label, icon }) => (
           <button key={id} type="button" className="nav-item" aria-current={page === id ? 'page' : undefined} onClick={() => onNavigate(id)}>
@@ -67,7 +71,7 @@ export default function DesktopShell({ brand, items, page, onNavigate, windowCon
     <div className="desktop-shell">
       <TitleBar brand={brand} windowControls={windowControls} navigationExpanded={expanded}
         onToggleNavigation={() => setExpanded(open => !open)} />
-      <Sidebar items={items} page={page} onNavigate={navigate} tools={sidebarTools} footer={sidebarFooter} expanded={expanded} />
+      <Sidebar brand={brand} items={items} page={page} onNavigate={navigate} tools={sidebarTools} footer={sidebarFooter} expanded={expanded} />
       <main className="main-content">
         {banner}
         <div className="main-scroll" ref={scroller}>{children}</div>
