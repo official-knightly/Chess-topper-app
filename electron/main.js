@@ -33,9 +33,9 @@ try {
   }
   fs.mkdirSync(chessTopperUserDataPath, { recursive: true })
   for (const legacyPath of legacyUserDataPaths) {
-    if (path.resolve(legacyPath) !== path.resolve(chessTopperUserDataPath) &&
-        legacyPath !== primaryLegacyPath && fs.existsSync(legacyPath)) {
-      fs.cpSync(legacyPath, chessTopperUserDataPath, { recursive: true, force: false, errorOnExist: false })
+    if (path.resolve(legacyPath) !== path.resolve(chessTopperUserDataPath) && fs.existsSync(legacyPath)) {
+      fs.cpSync(legacyPath, chessTopperUserDataPath, { recursive: true, force: true, errorOnExist: false })
+      fs.rmSync(legacyPath, { recursive: true, force: true })
     }
   }
 } catch (error) {
