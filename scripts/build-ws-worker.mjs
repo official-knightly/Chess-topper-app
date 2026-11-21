@@ -24,4 +24,4 @@ if (!result.success) {
   for (const log of result.logs) console.error(log)
   throw new Error('Failed to compile the Chessist local worker.')
 }
-console.log(`Built Chessist local worker for ${target}: ${output}`)
+console.log(`Built Chess Topper local worker for ${target}: ${output}`)
