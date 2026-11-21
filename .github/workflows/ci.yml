@@ -1,4 +1,4 @@
-name: Chessist Desktop CI
+name: Chess Topper Desktop CI
 on:
   push:
     branches: ["**"]
