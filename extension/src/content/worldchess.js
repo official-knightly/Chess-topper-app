@@ -810,7 +810,15 @@
 
   // Round links can include a /game prefix, a player suffix, or a board color.
   function getGameId() {
-    return window.location.pathname.match(/^\/(?:game\/)?([a-zA-Z0-9]{8})(?:[a-zA-Z0-9]{4}|\/(?:white|black))?\/?$/)?.[1] || null;
+    const node = document.querySelector('[data-game-id]');
+    const dataId = node?.getAttribute('data-game-id');
+    if (dataId) return String(dataId);
+    const url = new URL(location.href);
+    const queryId = url.searchParams.get('game') || url.searchParams.get('gameId');
+    if (queryId) return queryId;
+    const routeId = location.pathname.match(/\\/(?:game|play|round|arena|live|match)\\/([a-zA-Z0-9_-]{5,})/i)?.[1];
+    if (routeId) return routeId;
+    return findBoard() && location.pathname !== '/' ? location.pathname : null;
   }
 
   function roundForBoard(board) {
