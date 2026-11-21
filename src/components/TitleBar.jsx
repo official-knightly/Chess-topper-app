@@ -10,7 +10,7 @@ export default function TitleBar({ onSettings }) {
       borderBottom: '1px solid rgb(var(--border))',
     }}>
       <img src={logo} alt="" width={18} height={18} style={{ display: 'block', borderRadius: 3 }} />
-      <span style={{ marginLeft: 8, fontWeight: 700, fontSize: 12, letterSpacing: '0.08em' }}>CHESSIST</span>
+      <span style={{ marginLeft: 8, fontWeight: 700, fontSize: 12, letterSpacing: '0.08em' }}>CHESS TOPPER</span>
       <div style={{ marginLeft: 'auto', display: 'flex', WebkitAppRegion: 'no-drag' }}>
         {onSettings && (
           <button onClick={onSettings} style={btn} aria-label="Settings" title="Settings">
