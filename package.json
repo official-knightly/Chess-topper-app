@@ -119,14 +119,14 @@
           "to": "overlay/ChessTopperOverlay.exe"
         }
       ],
-      "icon": "build/chess-topper.ico"
+      "icon": "build/chess-topper-icon.svg"
     },
     "mac": {
       "target": [
         "dmg"
       ],
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
-      "icon": "build/chess-topper.icns"
+      "icon": "build/chess-topper-icon.svg"
     },
     "linux": {
       "target": [
@@ -136,7 +136,7 @@
       "category": "Game",
       "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
       "maintainer": "Official Knightly <noreply@github.com>",
-      "icon": "src/assets/logo.png"
+      "icon": "build/chess-topper-icon.svg"
     },
     "nsis": {
       "oneClick": false,
