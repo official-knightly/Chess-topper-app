@@ -90,13 +90,15 @@
           "from": "overlay/bin/Release/net48/ChessTopperOverlay.exe",
           "to": "overlay/ChessTopperOverlay.exe"
         }
-      ]
+      ],
+      "icon": "build/chess-topper.ico"
     },
     "mac": {
       "target": [
         "dmg"
       ],
-      "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}"
+      "artifactName": "Chess-Topper-Local-${version}-${arch}.${ext}",
+      "icon": "build/chess-topper.icns"
     },
     "linux": {
       "target": [
@@ -112,7 +114,9 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "artifactName": "Chess-Topper-${version}-${arch}.${ext}"
+      "artifactName": "Chess-Topper-${version}-${arch}.${ext}",
+      "installerIcon": "build/chess-topper.ico",
+      "uninstallerIcon": "build/chess-topper.ico"
     },
     "publish": [
       {
