@@ -816,7 +816,7 @@
     const url = new URL(location.href);
     const queryId = url.searchParams.get('game') || url.searchParams.get('gameId');
     if (queryId) return queryId;
-    const routeId = location.pathname.match(/\\/(?:game|play|round|arena|live|match)\\/([a-zA-Z0-9_-]{5,})/i)?.[1];
+    const routeId = location.pathname.match(/\/(?:game|play|round|arena|live|match)\/([a-zA-Z0-9_-]{5,})/i)?.[1];
     if (routeId) return routeId;
     return findBoard() && location.pathname !== '/' ? location.pathname : null;
   }
