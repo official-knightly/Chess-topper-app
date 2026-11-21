@@ -9,10 +9,26 @@ const { PerformanceCheck } = require('./performance-check')
 const { Diagnostics } = require('./diagnostics')
 const updater = require('./updater')
 
-// --prod (or CHESSIST_PROD=1) forces production mode when running unpacked from
-// the cloned repo via the local Electron (install.bat) — loads dist/ instead of
-// the Vite dev server.
-const forceProd = process.argv.includes('--prod') || process.env.CHESSIST_PROD === '1'
+// --prod (or CHESS_TOPPER_PROD=1) loads dist/ when running unpacked.
+const forceProd = process.argv.includes('--prod') || process.env.CHESS_TOPPER_PROD === '1' || process.env.CHESSIST_PROD === '1'
+
+// Use the Chess Topper data folder. Migrate the previous folder in place so
+// existing Stockfish files and user settings remain available after upgrading.
+app.setName('Chess Topper')
+app.setAppUserModelId('com.officialknightly.chesstopper')
+const legacyUserDataPath = app.getPath('userData')
+const chessTopperUserDataPath = path.join(app.getPath('appData'), 'Chess Topper')
+if (path.resolve(legacyUserDataPath) !== path.resolve(chessTopperUserDataPath)) {
+  try {
+    fs.mkdirSync(chessTopperUserDataPath, { recursive: true })
+    if (fs.existsSync(legacyUserDataPath)) {
+      fs.cpSync(legacyUserDataPath, chessTopperUserDataPath, { recursive: true, force: false, errorOnExist: false })
+    }
+  } catch (error) {
+    console.warn('Could not migrate previous app data folder:', error.message)
+  }
+  app.setPath('userData', chessTopperUserDataPath)
+}
 const isDev = !app.isPackaged && !forceProd
 let mainWindow = null
 let overlay = null
@@ -24,7 +40,7 @@ let shutdownFinished = false
 let performanceCheck = null
 const diagnostics = new Diagnostics()
 
-// ── Settings persistence (userData/chessist-settings.json) ──
+// ── Chess Topper settings persistence ──
 // Game/display settings owned by the app and pushed to the extension over WS.
 const gameSettings = {
   enabled: true,
@@ -66,9 +82,19 @@ function normalizeSidebarShortcuts(ids) {
   }))]
 }
 
-function settingsPath() { return path.join(app.getPath('userData'), 'chessist-settings.json') }
+function settingsPath() { return path.join(app.getPath('userData'), 'chess-topper-settings.json') }
 function loadAll() {
-  try { return JSON.parse(fs.readFileSync(settingsPath(), 'utf8')) || {} } catch { return {} }
+  try {
+    const current = settingsPath()
+    if (fs.existsSync(current)) return JSON.parse(fs.readFileSync(current, 'utf8')) || {}
+    const legacy = path.join(app.getPath('userData'), 'chessist-settings.json')
+    if (fs.existsSync(legacy)) {
+      const saved = JSON.parse(fs.readFileSync(legacy, 'utf8')) || {}
+      try { fs.writeFileSync(current, JSON.stringify(saved, null, 2)) } catch {}
+      return saved
+    }
+    return {}
+  } catch { return {} }
 }
 function saveAll({ engine = engineSettings, game = gameSettings } = {}) {
   const file = settingsPath()
