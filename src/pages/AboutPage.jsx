@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
 import Check from '../components/controls/Check'
 
-const VERSION = '1.0.4'
+const VERSION = '1.0.5'
 // Baked at build time when git is available (see vite.config.js). Empty for source-ZIP builds.
 const BUILD_SHA = (typeof __BUILD_SHA__ === 'string' ? __BUILD_SHA__ : '')
 const RELEASES_URL = 'https://github.com/official-knightly/Chess-topper-app-/releases'
@@ -198,7 +198,7 @@ export default function AboutPage({ updateStatus, onUpdateStatus }) {
         <p>Chess Topper v{VERSION}</p>
       </header>
       <p style={{ color: 'rgb(var(--fg-muted))', margin: '0 8px 14px' }}>
-        Live Stockfish evaluation for compatible Chess.com and Lichess boards, plus World Chess public profile lookup — a desktop app with a transparent,
+        Live Stockfish evaluation for compatible Chess.com and Lichess boards, plus World Chess live-board support — a desktop app with a transparent,
         screen-capture-invisible board overlay.
       </p>
       <div style={{ display: 'grid', gap: 4, padding: '0 8px' }}>
