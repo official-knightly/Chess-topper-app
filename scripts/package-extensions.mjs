@@ -24,5 +24,5 @@ async function prepare(name, manifest) {
 
 const chromiumManifest = JSON.parse(await readFile(resolve(source, "manifest.json"), "utf8"));
 await mkdir(release, { recursive: true });
-await prepare("chessist-chromium-extension", chromiumManifest);
-await prepare("chessist-firefox-extension", firefoxManifest);
+await prepare("chess-topper-chromium-extension", chromiumManifest);
+await prepare("chess-topper-firefox-extension", firefoxManifest);
