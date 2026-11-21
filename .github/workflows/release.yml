@@ -3,7 +3,7 @@ name: Chess Topper Desktop Releases
 on:
   workflow_dispatch:
   push:
-    branches: [chessist-desktop-app]
+    branches: [main]
     tags: ["v*"]
 
 permissions:
@@ -57,7 +57,7 @@ jobs:
   publish-release:
     name: Publish standalone desktop installers
     needs: [desktop]
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/chessist-desktop-app' || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Download all build artifacts
@@ -68,12 +68,12 @@ jobs:
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.4' }}
-          target_commitish: chessist-desktop-app
-          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.4' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.5' }}
+          target_commitish: main
+          name: Chess Topper ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v1.0.5' }}
           generate_release_notes: false
           body: |
-            ## Chess Topper v1.0.4
+            ## Chess Topper v1.0.5
 
             A refreshed desktop release for Windows, macOS and Linux.
 
@@ -81,11 +81,11 @@ jobs:
             - Consistent Chess Topper branding across the desktop app and release downloads.
             - Native Stockfish analysis, live board evaluation and configurable move assistance.
             - Existing Chess.com and Lichess browser-extension integration.
-            - World Chess public-profile link support.
+            - World Chess live-board integration using the existing desktop analysis overlay.
             - Cleaner release downloads: platform installers only, with updater metadata retained for in-app updates.
 
             ### Lichess
-            Live-board analysis and move assistance still require a Lichess game tab in a supported browser with the Chess Topper extension loaded. This release does not include a standalone embedded Lichess online-play board.
+            Live-board analysis and move assistance still require a Lichess game tab in a supported browser with the Chess Topper extension loaded. World Chess live-board support uses the browser extension and the existing desktop overlay.
           fail_on_unmatched_files: false
           files: |
             release-assets/chess-topper-desktop-win/*.exe
