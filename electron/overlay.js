@@ -3,8 +3,8 @@ const path = require('path')
 const fs = require('fs')
 
 function resolveOverlayExe(isDev, resourcesPath) {
-  const devPath = path.join(__dirname, '..', 'overlay', 'bin', 'Release', 'net48', 'ChessistOverlay.exe')
-  const prodPath = path.join(resourcesPath, 'overlay', 'ChessistOverlay.exe')
+  const devPath = path.join(__dirname, '..', 'overlay', 'bin', 'Release', 'net48', 'ChessTopperOverlay.exe')
+  const prodPath = path.join(resourcesPath, 'overlay', 'ChessTopperOverlay.exe')
   if (isDev && fs.existsSync(devPath)) return devPath
   if (fs.existsSync(prodPath)) return prodPath
   if (fs.existsSync(devPath)) return devPath
