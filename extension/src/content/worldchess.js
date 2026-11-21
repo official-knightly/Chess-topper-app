@@ -834,7 +834,7 @@
     const url = new URL(location.href);
     const queryId = url.searchParams.get('game') || url.searchParams.get('gameId');
     if (queryId) return queryId;
-    const routeId = location.pathname.match(/\/(?:game|play|round|arena|live|match)\/([a-zA-Z0-9_-]{5,})/i)?.[1];
+    const routeId = location.pathname.match(/\/(?:game|games|play|round|arena|live|match)\/([a-zA-Z0-9_-]{5,})/i)?.[1];
     if (routeId) return routeId;
     return findBoard() && location.pathname !== '/' ? location.pathname : null;
   }
@@ -848,11 +848,14 @@
   function isInOwnGame(board = findBoard()) {
     if (!board || !getGameId()) return false;
     const scope = roundForBoard(board) || document;
-    return !!scope.querySelector(
+    if (scope.querySelector(
       '[data-testid*="resign"], [data-testid*="draw"], [aria-label*="resign" i], ' +
-      '[aria-label*="draw" i], button[title*="resign" i], button[title*="draw" i], ' +
-      '.rcontrols .resign, .rcontrols .draw'
-    );
+      '[aria-label*="draw" i], [aria-label*="give up" i], button[title*="resign" i], ' +
+      'button[title*="draw" i], .rcontrols .resign, .rcontrols .draw'
+    )) return true;
+    const controls = [...scope.querySelectorAll('button, [role="button"]')]
+      .map(node => (node.getAttribute('aria-label') || node.textContent || '').trim().toLowerCase());
+    return controls.some(label => /^(resign|give up|offer draw|draw|abort game)$/.test(label));
   }
 
   // ============================================================
