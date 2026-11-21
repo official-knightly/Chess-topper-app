@@ -164,8 +164,8 @@ function OverlayModule({ status }) {
 const PERFORMANCE_PHASES = {
   local: 'Measuring the local connection…',
   stockfish: 'Analyzing offline positions with Stockfish…',
-  foreground: 'Keep Chessist in front while it measures desktop updates.',
-  background: 'Optional: switch to another window for background samples. Keep Chessist visible beside it.',
+  foreground: 'Keep Chess Topper in front while it measures desktop updates.',
+  background: 'Optional: switch to another window for background samples. Keep Chess Topper visible beside it.',
 }
 
 function isScoreVisible(element) {
@@ -247,7 +247,7 @@ function PerformanceModule() {
         Measure the local Bun connection, Stockfish on offline positions, and desktop update latency. Results stay on this PC.
       </p>
       <p style={{ ...description, marginTop: 6 }}>
-        This check measures local work. For site and network latency, use Lichess’s lag check. Keep Chessist in front until asked to switch windows.
+        This check measures local work. For site and network latency, use Lichess’s lag check. Keep Chess Topper in front until asked to switch windows.
       </p>
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
         <button type="button" disabled={running} onClick={runCheck} style={{
@@ -316,7 +316,7 @@ function ExtensionModule({ status }) {
         <div style={{ marginBottom: !needsUpdate && !showInstructions ? 0 : 10 }}>
           <p style={{ fontSize: 12, color: 'rgb(var(--fg-muted))', lineHeight: 1.6 }}>
             {needsUpdate
-              ? 'If Chessist still shows an older version in your browser, reload the extension. If the version stays the same, load the bundled folder below.'
+              ? 'If Chess Topper still shows an older version in your browser, reload the extension. If the version stays the same, load the bundled folder below.'
               : 'The extension is connected. Open or refresh a chess tab on Chess.com or Lichess to start analysis.'}
           </p>
           {!needsUpdate && (
