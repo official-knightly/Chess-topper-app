@@ -14,31 +14,27 @@ const forceProd = process.argv.includes('--prod') || process.env.CHESS_TOPPER_PR
 
 // Use the Chess Topper data folder. Migrate the previous folder in place so
 // existing Stockfish files and user settings remain available after upgrading.
+const appDataRoot = app.getPath('appData')
+const legacyUserDataPaths = [
+  app.getPath('userData'),
+  path.join(appDataRoot, 'chessist'),
+  path.join(appDataRoot, 'Chessist'),
+  path.join(appDataRoot, 'ai.chessist.local'),
+]
 app.setName('Chess Topper')
 app.setAppUserModelId('com.officialknightly.chesstopper')
-const legacyUserDataPath = app.getPath('userData')
-const chessTopperUserDataPath = path.join(app.getPath('appData'), 'Chess Topper')
-if (path.resolve(legacyUserDataPath) !== path.resolve(chessTopperUserDataPath)) {
-  try {
-    fs.mkdirSync(chessTopperUserDataPath, { recursive: true })
-    if (fs.existsSync(legacyUserDataPath)) {
-      fs.cpSync(legacyUserDataPath, chessTopperUserDataPath, { recursive: true, force: false, errorOnExist: false })
+const chessTopperUserDataPath = path.join(appDataRoot, 'Chess Topper')
+try {
+  fs.mkdirSync(chessTopperUserDataPath, { recursive: true })
+  for (const legacyPath of legacyUserDataPaths) {
+    if (path.resolve(legacyPath) !== path.resolve(chessTopperUserDataPath) && fs.existsSync(legacyPath)) {
+      fs.cpSync(legacyPath, chessTopperUserDataPath, { recursive: true, force: false, errorOnExist: false })
     }
-  } catch (error) {
-    console.warn('Could not migrate previous app data folder:', error.message)
   }
-  app.setPath('userData', chessTopperUserDataPath)
+} catch (error) {
+  console.warn('Could not migrate previous app data folder:', error.message)
 }
-const isDev = !app.isPackaged && !forceProd
-let mainWindow = null
-let overlay = null
-let bridge = null
-let stockfishTask = null
-let updateInProgress = false
-let quitting = false
-let shutdownFinished = false
-let performanceCheck = null
-const diagnostics = new Diagnostics()
+app.setPath('userData', chessTopperUserDataPath)
 
 // ── Chess Topper settings persistence ──
 // Game/display settings owned by the app and pushed to the extension over WS.
