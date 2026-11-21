@@ -16,7 +16,7 @@ if (target === 'mac') {
   }
 }
 if (!resources || !existsSync(resources)) throw new Error(`Packaged resources folder not found for ${target}.`)
-const required = ['extension/manifest.json','extension/src/background/service-worker.js','extension/src/content/content.js','extension/src/content/lichess.js','extension/src/content/worldchess.js','extension/src/content/move-observer.js','extension/src/content/content.css','extension/src/popup/popup.html','extension/src/popup/popup.js','extension/icons/icon128.png','firefox/manifest.json','firefox/src/background/service-worker.js','firefox/src/content/worldchess.js']
+const required = ['extension/manifest.json','extension/src/background/service-worker.js','extension/src/content/content.js','extension/src/content/lichess.js','extension/src/content/worldchess.js','extension/src/content/move-observer.js','extension/src/content/content.css','extension/src/popup/popup.html','extension/src/popup/popup.js','extension/icons/icon128.png','app-icon.png','firefox/manifest.json','firefox/src/background/service-worker.js','firefox/src/content/worldchess.js']
 const missing = required.filter(file => !existsSync(join(resources, file)))
 if (missing.length) throw new Error(`The ${target} installer is missing bundled extension files:\n${missing.join('\n')}`)
 console.log(`Verified ${target} package: complete Chromium and Firefox extensions are present in ${resources}`)

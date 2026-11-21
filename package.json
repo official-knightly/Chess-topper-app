@@ -1,6 +1,6 @@
 {
   "name": "chess-topper-desktop",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "description": "Chess Topper native desktop chess application",
   "main": "electron/main.js",
@@ -14,14 +14,15 @@
     "build": "vite build",
     "test": "node --check extension/src/content/worldchess.js && node --check extension/src/background/service-worker.js && node --check extension/src/content/move-observer.js && node --check electron/main.js && node --check electron/preload.js && node --check electron/ws-server.js && node --check electron/wsserver.js && node --check electron/lichess-monitor.js && node --check electron/lichess-api.js && node --test electron/engine-authorization.test.js electron/fairness-lock.test.js && vitest run electron/bun-ws-transport.test.js electron/engine.test.js electron/extension-move.test.js electron/extension-reload.test.js electron/installer-updater.test.js electron/lichess-round.test.js electron/move-observer.test.js electron/stockfish.test.js src/services/platform-adapters.test.js",
     "start": "electron .",
-    "package:dir": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --dir",
-    "dist:win": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --win nsis --publish never && node scripts/verify-package.mjs win",
-    "dist:mac": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --mac dmg --publish never && node scripts/verify-package.mjs mac",
-    "dist:linux": "npm run build:firefox-ext && npm run build:worker && npm run build && electron-builder --linux AppImage deb --publish never && node scripts/verify-package.mjs linux",
+    "package:dir": "npm run build:firefox-ext && npm run build:worker && npm run build && npm run generate:icons && electron-builder --dir",
+    "dist:win": "npm run build:firefox-ext && npm run build:worker && npm run build && npm run generate:icons && electron-builder --win nsis --publish never && node scripts/verify-package.mjs win",
+    "dist:mac": "npm run build:firefox-ext && npm run build:worker && npm run build && npm run generate:icons && electron-builder --mac dmg --publish never && node scripts/verify-package.mjs mac",
+    "dist:linux": "npm run build:firefox-ext && npm run build:worker && npm run build && npm run generate:icons && electron-builder --linux AppImage deb --publish never && node scripts/verify-package.mjs linux",
     "build:firefox-ext": "node scripts/build-firefox-ext.mjs",
     "package:extensions": "node scripts/package-extensions.mjs",
     "build:worker": "bun scripts/build-ws-worker.mjs",
-    "build:overlay": "powershell -ExecutionPolicy Bypass -File scripts/build-overlay.ps1"
+    "build:overlay": "powershell -ExecutionPolicy Bypass -File scripts/build-overlay.ps1",
+    "generate:icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@fontsource/instrument-sans": "5.2.8",
@@ -41,7 +42,8 @@
     "vite": "6.3.5",
     "vitest": "3.2.4",
     "wait-on": "8.0.4",
-    "@vitejs/plugin-react": "^4.3.4"
+    "@vitejs/plugin-react": "^4.3.4",
+    "sharp": "^0.34.5"
   },
   "build": {
     "appId": "com.officialknightly.chesstopper",
@@ -77,6 +79,10 @@
           "**/*",
           "!**/.DS_Store"
         ]
+      },
+      {
+        "from": "build/chess-topper-icon.png",
+        "to": "app-icon.png"
       }
     ],
     "protocols": [
@@ -117,6 +123,10 @@
         {
           "from": "overlay/bin/Release/net48/ChessTopperOverlay.exe",
           "to": "overlay/ChessTopperOverlay.exe"
+        },
+        {
+          "from": "build/chess-topper-icon.png",
+          "to": "app-icon.png"
         }
       ],
       "icon": "build/chess-topper-icon.png"

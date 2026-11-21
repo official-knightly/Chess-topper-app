@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.8] — 2026-11-21
+
+### Installer and app icon repair
+- Regenerate a valid PNG app icon from the checked-in Chess Topper knight SVG before packaging each platform.
+- Embed the generated icon in the installed app and set it on the desktop window.
+- Keep the Chromium and Firefox extension folders as explicit installer resources and require the package verifier to find their manifests and live-board scripts before release upload.
+- Preserve the existing Stockfish setup and all existing engine files.
+
+
 ## [1.0.7] — 2026-11-21
 
 ### Release build fixes

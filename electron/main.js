@@ -147,6 +147,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1040, height: 720, minWidth: 720, minHeight: 480,
     title: 'Chess Topper', backgroundColor: '#000000',
+    icon: path.join(process.resourcesPath, 'app-icon.png'),
     frame: false, titleBarStyle: 'hidden', autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
