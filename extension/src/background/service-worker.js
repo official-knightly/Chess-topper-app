@@ -307,14 +307,19 @@ async function domBoardMove(tabId, fromSquare, toSquare, mode, promotion, instan
       const files = 'abcdefgh'
       const wrap = document.querySelector('cg-wrap') || document.querySelector('.cg-wrap')
       const chessCom = document.querySelector('wc-chess-board') || document.querySelector('chess-board')
+      const worldChess = document.querySelector('[data-testid="chessboard"], [data-testid="chess-board"], [data-game-board], .chess-board, .chessboard, [class*="chess-board"]')
       const board = wrap
         ? (wrap.querySelector('cg-board') || wrap)
-        : (chessCom?.querySelector('.board') || chessCom?.shadowRoot?.querySelector('.board') || chessCom)
+        : chessCom
+          ? (chessCom.querySelector('.board') || chessCom.shadowRoot?.querySelector('.board') || chessCom)
+          : (worldChess?.querySelector('[data-board-surface], .board-surface') || worldChess)
       if (!board) return { ok: false, error: 'DOM board unavailable' }
 
       const flipped = wrap
         ? wrap.classList.contains('orientation-black')
-        : (chessCom.classList.contains('flipped') || chessCom.getAttribute('board-orientation') === 'black')
+        : chessCom
+          ? (chessCom.classList.contains('flipped') || chessCom.getAttribute('board-orientation') === 'black')
+          : (worldChess?.classList.contains('flipped') || worldChess?.getAttribute('data-orientation') === 'black' || worldChess?.getAttribute('data-player-color') === 'black')
       const rect = board.getBoundingClientRect()
       if (!rect.width || !rect.height) return { ok: false, error: 'DOM board has no size' }
       const size = rect.width / 8
@@ -425,13 +430,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const files = 'abcdefgh'
       const wrap = document.querySelector('cg-wrap') || document.querySelector('.cg-wrap')
       const chessCom = document.querySelector('wc-chess-board') || document.querySelector('chess-board')
+      const worldChess = document.querySelector('[data-testid="chessboard"], [data-testid="chess-board"], [data-game-board], .chess-board, .chessboard, [class*="chess-board"]')
       const board = wrap
         ? (wrap.querySelector('cg-board') || wrap)
-        : (chessCom?.querySelector('.board') || chessCom?.shadowRoot?.querySelector('.board') || chessCom)
+        : chessCom
+          ? (chessCom.querySelector('.board') || chessCom.shadowRoot?.querySelector('.board') || chessCom)
+          : (worldChess?.querySelector('[data-board-surface], .board-surface') || worldChess)
       if (!board) return null
       const flipped = wrap
         ? wrap.classList.contains('orientation-black')
-        : (chessCom.classList.contains('flipped') || chessCom.getAttribute('board-orientation') === 'black')
+        : chessCom
+          ? (chessCom.classList.contains('flipped') || chessCom.getAttribute('board-orientation') === 'black')
+          : (worldChess?.classList.contains('flipped') || worldChess?.getAttribute('data-orientation') === 'black' || worldChess?.getAttribute('data-player-color') === 'black')
       const rect = board.getBoundingClientRect()
       if (!rect.width || !rect.height) return null
       const size = rect.width / 8
