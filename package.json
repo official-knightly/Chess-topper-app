@@ -101,32 +101,8 @@
       "artifactName": "Chess-Topper-${version}-${arch}.${ext}",
       "extraResources": [
         {
-          "from": "build/worker/bun-ws-worker.exe",
-          "to": "bun-ws-worker.exe"
-        },
-        {
-          "from": "extension",
-          "to": "extension",
-          "filter": [
-            "**/*",
-            "!**/.DS_Store"
-          ]
-        },
-        {
-          "from": "firefox",
-          "to": "firefox",
-          "filter": [
-            "**/*",
-            "!**/.DS_Store"
-          ]
-        },
-        {
           "from": "overlay/bin/Release/net48/ChessTopperOverlay.exe",
           "to": "overlay/ChessTopperOverlay.exe"
-        },
-        {
-          "from": "build/chess-topper-icon.png",
-          "to": "app-icon.png"
         }
       ],
       "icon": "build/chess-topper-icon.ico"
